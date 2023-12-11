@@ -1002,7 +1002,7 @@ class DataHandler(MetaCatHandler):
                         )
                 )
 
-            DBFile.update_many(db, file_set, do_commit=True)
+            DBFile.update_many(db, file_set)
 
         return json.dumps(out), "application/json"
 
