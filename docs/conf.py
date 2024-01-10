@@ -59,3 +59,6 @@ html_theme = 'nature'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# moving to fermitools.github.io
+html_baseurl = 'https://fermitools.github.io/MetaCat/'

@@ -34,7 +34,7 @@ class Transaction(object):
         if not self.InTransaction:
             raise RuntimeError("Not in transaction")
         try:
-            self.Cursor.execute(*params, **args)
+            self.Cursor.executemany(*params, **args)
         except:
             self.rollback()
             raise
