@@ -3,7 +3,13 @@
 
 # Required
 version: 2
- 
+
+# try to set trigger action
+on:
+  push:
+    branches:
+      - main
+
 # Set the OS, Python version and other tools you might need
 build:
   os: ubuntu-22.04
