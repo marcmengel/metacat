@@ -15,12 +15,28 @@ def test_metacat_version_(env):
         assert(data.find("Server version") > 0)
         assert(data.find("Client version") > 0)
 
-def test_metacat_auth_login(env, token):
+# punting on non-token login types for now
+#def test_metacat_auth_login_x509(env, proxy):
+#    with os.popen(f"metacat auth login -m x509 {os.environ['USER']}", "r") as fin:
+#        data = fin.read()
+#        assert(data.find(os.environ['USER']) > 0)
+#        assert(data.find("User") >= 0)
+#        assert(data.find("Expires") >= 0)
+#
+#def test_metacat_auth_login_services(env, passwd):
+#    with os.popen(f"metacat auth login -m token {os.environ['USER']}", "r") as fin:
+#        data = fin.read()
+#        assert(data.find(os.environ['USER']) > 0)
+#        assert(data.find("User") >= 0)
+#        assert(data.find("Expires") >= 0)
+
+def test_metacat_auth_login_token(env, token):
     with os.popen(f"metacat auth login -m token {os.environ['USER']}", "r") as fin:
         data = fin.read()
         assert(data.find(os.environ['USER']) > 0)
         assert(data.find("User") >= 0)
         assert(data.find("Expires") >= 0)
+
 
 def test_metacat_auth_whoami(env):
     with os.popen("metacat auth whoami", "r") as fin:
@@ -52,6 +68,8 @@ def test_metacat_auth_export(env):
 #def test_metacat_auth_import(env):
 #    with os.popen("metacat auth import", "r") as fin:
 #        data = fin.read()
+
+#=================  below here is largely unfilled-in ==========================
         
 # jumping some file delcaration tests first, so we then have some files
 # to make datasets of(?) 
@@ -85,12 +103,12 @@ def test_metacat_dataset_list(env):
         data = fin.read()
         # check output
 
-def test_metacat_dataset_add-subset(env):
+def test_metacat_dataset_add_subset(env):
     with os.popen("metacat dataset add-subset", "r") as fin:
         data = fin.read()
         # check output
 
-def test_metacat_dataset_add-files(env):
+def test_metacat_dataset_add_files(env):
     with os.popen("metacat dataset add-files", "r") as fin:
         data = fin.read()
         # check output
