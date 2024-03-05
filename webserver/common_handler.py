@@ -135,7 +135,7 @@ class MetaCatHandler(BaseHandler):
             ns = DBNamespace.get(db, namespace)
             if ns is None:
                 raise KeyError("Namespace %s does not exist")
-            authorized = ns.owned_by_user(user)
+            authorized = ns.owned_by_user(user) or user.is_admin() 
             self.NamespaceAuthorizations[namespace] = authorized
         return authorized
 
