@@ -318,7 +318,7 @@ class RetireCommand(CLICommand):
             namespace, name = args
         else:
             raise InvalidArguments("Too many arguments")
-        do_retire = not ("-u" not in opts or "--unretire" in opts)
+        do_retire = not ("-u" in opts or "--unretire" in opts)
         try:
             data = client.retire_file(did=did, namespace=namespace, name=name, retire=do_retire)
         except MCError as e:
