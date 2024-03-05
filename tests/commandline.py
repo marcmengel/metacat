@@ -208,17 +208,8 @@ def x_test_metacat_category_show(env):
         data = fin.read()
         # check output
 
-def x_test_metacat_file_declare(env):
-    with os.popen("metacat file declare", "r") as fin:
-        data = fin.read()
-        # check output
 
-def x_test_metacat_file_declare-many(env):
-    with os.popen("metacat file declare-many", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_file_declare-sample(env):
+def x_test_metacat_file_declare_sample(env):
     with os.popen("metacat file declare-sample", "r") as fin:
         data = fin.read()
         # check output
@@ -243,7 +234,7 @@ def x_test_metacat_file_update(env):
         data = fin.read()
         # check output
 
-def x_test_metacat_file_update-meta(env):
+def x_test_metacat_file_update_meta(env):
     with os.popen("metacat file update-meta", "r") as fin:
         data = fin.read()
         # check output
@@ -268,12 +259,12 @@ def x_test_metacat_file_show(env):
         data = fin.read()
         # check output
 
-def x_test_metacat_query_-q(env):
+def x_test_metacat_query_q(env):
     with os.popen("metacat query -q", "r") as fin:
         data = fin.read()
         # check output <MQL query file>
 
-def x_test_metacat_query_"<MQL(env):
+def x_test_metacat_query_mql"<MQL(env):
     with os.popen("metacat query "<MQL", "r") as fin:
         data = fin.read()
         # check output query>"
