@@ -6,22 +6,24 @@ import json
 
 from env import env, token
 
+start_ds = time.time()
+
     
 @pytest.fixture
 def tst_ds():
-    ds = time.time()
+    ds = start_ds
     return f"{os.environ['USER']}:tst{ds}"
 
 @pytest.fixture
 def tst_file_md_list():
-    ds = time.time()
+    ds = start_ds
     mdl = []
     for i in range(5):
         fname = f"tst_{ds}_{i}.txt"
         fcont = f"data file {fname}\n"
         with open(fname, "w") as fo:
             fo.write(fcont)
-        with os.popen("xrdadler32 {fname}", "r") as fi:
+        with os.popen(f"xrdadler32 {fname}", "r") as fi:
             hash_n_name = fi.read()
         fhash, _  = hash_n_name.split(" ")
         mdl.append({ 
@@ -29,19 +31,20 @@ def tst_file_md_list():
            "namespace": os.environ["USER"],
            "size": len(fcont),
            "checksums": {"adler32": fhash},
-           "metadata": { "ds": ds },
+           "metadata": { "f.ds": ds },
         })
     return mdl
 
 # need tests for at least:
 
 def test_metacat_help_(env):
-    with os.popen("metacat help ", "r") as fin:
+    with os.popen("metacat help 2>&1 ", "r") as fin:
         data = fin.read()
-        assert(data.find("metacat") > 0 )
-        assert(data.find("auth") > 0 )
-        assert(data.find("login") > 0 )
-        assert(data.find("version") > 0 )
+    print(f"data: '{data}'")
+    assert(data.find("metacat") >= 0 )
+    assert(data.find("auth") > 0 )
+    assert(data.find("login") > 0 )
+    assert(data.find("version") > 0 )
 
 def test_metacat_version_(env):
     with os.popen("metacat version ", "r") as fin:
@@ -89,12 +92,12 @@ def test_metacat_auth_whoami(env):
 def test_metacat_auth_list(env):
     with os.popen("metacat auth list", "r") as fin:
         data = fin.read()
-        assert(data.find('Token Library'), >= 0)
-        assert(data.find('{os.environ["USER"]}/.token_library'), >= 0)
-        assert(data.find(os.environ["HYPOT_SERVER_URL"]), >= 0)
+        assert(data.find('Token library') >= 0)
+        assert(data.find(f'{os.environ["USER"]}/.token_library') >= 0)
+        assert(data.find(os.environ["METACAT_SERVER_URL"]) >= 0)
 
 def test_metacat_auth_export(env):
-    with os.popen("metacat auth export {os.environ['HYPOT_SERVER_URL']}", "r") as fin:
+    with os.popen(f"metacat auth export {os.environ['METACAT_SERVER_URL']}", "r") as fin:
         data = fin.read()
         assert(len(data) > 128)
 
@@ -107,7 +110,7 @@ def test_metacat_auth_export(env):
 # jumping some file delcaration tests first, so we then have some files
 # to make datasets of(?) 
 def test_metacat_dataset_create(env, tst_ds):
-    with os.popen("metacat dataset create ds ", "r") as fin:
+    with os.popen(f"metacat dataset create {tst_ds} ", "r") as fin:
         data = fin.read()
     assert(data.find(tst_ds) > 0)
     assert(data.find("ataset") > 0)
@@ -115,18 +118,19 @@ def test_metacat_dataset_create(env, tst_ds):
 
 def test_metacat_file_declare(env,tst_file_md_list, tst_ds):
     md = tst_file_md_list[0]
-    with open("mdf", "w") as mdf:
+    with open("mdf1", "w") as mdf:
         json.dump(md, mdf);
-    with os.popen(f"metacat file declare -f mdf {tst_ds} ", "r") as fin:
+    with os.popen(f"metacat file declare -f mdf1 {tst_ds} ", "r") as fin:
         data = fin.read()
+    print(f"got data: '{data}'")
     assert( data.find(os.environ["USER"]) > 0)
     assert( data.find(md["name"]) > 0)
 
         
-def test_metacat_file_declare_many(env, tst_file_md_list):
+def test_metacat_file_declare_many(env, tst_ds, tst_file_md_list):
     with open("mdf", "w") as mdf:
         json.dump(tst_file_md_list[1:], mdf)
-    with os.popen("metacat file declare-many mdf", "r") as fin:
+    with os.popen(f"metacat file declare-many mdf {tst_ds}", "r") as fin:
         data = fin.read()
     assert( data.find(os.environ["USER"]) > 0)
     for md in tst_file_md_list[1:]:
@@ -139,14 +143,14 @@ def test_metacat_dataset_show(env, tst_ds):
     ns,dsname = tst_ds.split(":")
     assert( data.find(ns) > 0)
     assert( data.find(dsname) > 0)
-    assert( os.environ["USER"] > 0)
+    assert( data.find(os.environ["USER"]) > 0)
 
 
-def test_metacat_dataset_files(env, tst_ds, tst_file_mdlist):
+def test_metacat_dataset_files(env, tst_ds, tst_file_md_list):
     with os.popen(f"metacat dataset files {tst_ds}", "r") as fin:
         data = fin.read()
     # should list all the files...
-    for md in test_file_mdlist:
+    for md in tst_file_md_list:
         assert(data.find( md["name"] ) > 0)
 
 
@@ -168,7 +172,7 @@ def x_test_metacat_dataset_add_files(env):
         data = fin.read()
         # check output
 
-def x_test_metacat_dataset_remove-files(env):
+def x_test_metacat_dataset_remove_files(env):
     with os.popen("metacat dataset remove-files", "r") as fin:
         data = fin.read()
         # check output
@@ -264,8 +268,8 @@ def x_test_metacat_query_q(env):
         data = fin.read()
         # check output <MQL query file>
 
-def x_test_metacat_query_mql"<MQL(env):
-    with os.popen("metacat query "<MQL", "r") as fin:
+def x_test_metacat_query_mql(env):
+    with os.popen("metacat query", "r") as fin:
         data = fin.read()
         # check output query>"
 
@@ -290,7 +294,7 @@ def x_test_metacat_named_query_search(env):
         # check output
 
 
-def x_test_metacat_validate_[options](env):
+def x_test_metacat_validate(env):
     with os.popen("metacat validate [options]", "r") as fin:
         data = fin.read()
         # check output <JSON file with metadata>

@@ -11,5 +11,5 @@ def env():
 
 @pytest.fixture
 def token(env):
-    os.system("htgettoken -i hypot -a htvaultprod.fnal.gov", "r");
+    os.system("htgettoken -i hypot -a htvaultprod.fnal.gov")
 
