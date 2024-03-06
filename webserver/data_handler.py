@@ -780,7 +780,16 @@ class DataHandler(MetaCatHandler):
                     .replace("$fid", fid)
                 print("")
 
-            f = DBFile(db, namespace=namespace, name=name, fid=fid, metadata=meta, size=size, creator=user.Username)
+            # allow admins to use creation info if present for migration.
+            # default it if not passed, or not admin.
+            if user.is_admin():
+                creator = file_item.get("creator", user.Username)
+                created_timestamp = file_item.get("created_timestamp", None)
+            else:
+                creator = user.Username
+                created_timestamp = None
+
+            f = DBFile(db, namespace=namespace, name=name, fid=fid, metadata=meta, size=size, creator=creator, created_timestamp=created_timestamp)
             f.Checksums = file_item.get("checksums")
 
             parents = []
