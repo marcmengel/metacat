@@ -159,18 +159,23 @@ def test_metacat_dataset_list(env, tst_ds):
         data = fin.read()
     assert(data.find(tst_ds) >= 0)
 
+
+def test_metacat_dataset_add_subset(env, tst_ds):
+    tst_ds2 = tst_ds + "_super"
+    os.system(f"metacat dataset create {tst_ds2}")
+    with os.popen(f"metacat dataset add-subset {tst_ds2} {tst_ds} 2>&1", "r") as fin:
+        data = fin.read()
+    assert(data == "")
+
+
+def test_metacat_dataset_add_files(env, tst_ds):
+    query = f'(files where creator="{os.environ["USER"]}") - (files from {tst_ds}) limit 10'
+    with os.popen(f"metacat dataset add-files --query '{query}' {tst_ds} ", "r") as fin:
+        data = fin.read()
+    assert(data.find("Added 10 files") >= 0)
+
 #=================  below here is largely unfilled-in ==========================
 #  remember to take the x_ off as you fill tghem en
-
-def x_test_metacat_dataset_add_subset(env):
-    with os.popen("metacat dataset add-subset", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_dataset_add_files(env):
-    with os.popen("metacat dataset add-files", "r") as fin:
-        data = fin.read()
-        # check output
 
 def x_test_metacat_dataset_remove_files(env):
     with os.popen("metacat dataset remove-files", "r") as fin:
