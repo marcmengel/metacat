@@ -1,4 +1,7 @@
-
+"""
+  This file has a commandline based integration test for the metacat
+  client and server.
+"""
 import os
 import time
 import pytest
@@ -33,7 +36,9 @@ def tst_file_md_list():
            "checksums": {"adler32": fhash},
            "metadata": { "f.ds": ds },
         })
-    return mdl
+    yield(mdl)
+    for md in mdl:
+        os.unlink(md["name"])
 
 # need tests for at least:
 
@@ -123,6 +128,7 @@ def test_metacat_file_declare(env,tst_file_md_list, tst_ds):
     with os.popen(f"metacat file declare -f mdf1 {tst_ds} ", "r") as fin:
         data = fin.read()
     print(f"got data: '{data}'")
+    os.unlink("mdf1")
     assert( data.find(os.environ["USER"]) > 0)
     assert( data.find(md["name"]) > 0)
 
@@ -132,6 +138,7 @@ def test_metacat_file_declare_many(env, tst_ds, tst_file_md_list):
         json.dump(tst_file_md_list[1:], mdf)
     with os.popen(f"metacat file declare-many mdf {tst_ds}", "r") as fin:
         data = fin.read()
+    os.unlink("mdf")
     assert( data.find(os.environ["USER"]) > 0)
     for md in tst_file_md_list[1:]:
         assert( data.find(md["name"]) > 0)
@@ -174,79 +181,121 @@ def test_metacat_dataset_add_files(env, tst_ds):
         data = fin.read()
     assert(data.find("Added 10 files") >= 0)
 
-#=================  below here is largely unfilled-in ==========================
-#  remember to take the x_ off as you fill tghem en
 
-def x_test_metacat_dataset_remove_files(env):
-    with os.popen("metacat dataset remove-files", "r") as fin:
+
+def test_metacat_dataset_update_fail(env, tst_ds):
+    md='{"foo": "bar"}'
+    with os.popen(f"metacat dataset update -j -m '{md}' {tst_ds} 2>&1", "r") as fin:
         data = fin.read()
         # check output
+    assert(data.find("Metadata parameter without a category") >= 0)
 
-def x_test_metacat_dataset_update(env):
-    with os.popen("metacat dataset update", "r") as fin:
+def test_metacat_dataset_update(env, tst_ds):
+    md='{"foo.baz": "bar"}'
+    with os.popen(f"metacat dataset update -j -m '{md}' {tst_ds}", "r") as fin:
         data = fin.read()
         # check output
+    assert(data.find("foo.baz") >= 0)
+    assert(data.find("bar") >= 0)
 
-def x_test_metacat_dataset_remove(env):
-    with os.popen("metacat dataset remove", "r") as fin:
+
+def test_metacat_dataset_remove(env, tst_ds):
+    tst_ds2 = tst_ds + "_super"
+    with os.popen(f"metacat dataset remove {tst_ds2}", "r") as fin:
+        data = fin.read()
+    assert(data.find("eleted")>= 0)
+
+
+def test_metacat_namespace_create(env, tst_ds):
+    ns = tst_ds.replace(":","_")
+    with os.popen(f"metacat namespace create -j {ns}", "r") as fin:
         data = fin.read()
         # check output
-
-def x_test_metacat_namespace_create(env):
-    with os.popen("metacat namespace create", "r") as fin:
-        data = fin.read()
-        # check output
+    print("Got:", data)
+    assert(data.find('"name":') >= 0)
+    assert(data.find(ns) >= 0)
 
 def x_test_metacat_namespace_list(env):
+    ns = tst_ds.replace(":","_")
     with os.popen("metacat namespace list", "r") as fin:
         data = fin.read()
-        # check output
+    assert(data.find(ns) >= 0 )
 
-def x_test_metacat_namespace_show(env):
-    with os.popen("metacat namespace show", "r") as fin:
+def test_metacat_namespace_show(env, tst_ds):
+    ns = tst_ds.replace(":","_")
+    with os.popen(f"metacat namespace show {ns}", "r") as fin:
         data = fin.read()
-        # check output
-
-def x_test_metacat_category_list(env):
-    with os.popen("metacat category list", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_category_show(env):
-    with os.popen("metacat category show", "r") as fin:
-        data = fin.read()
-        # check output
+    assert(data.find(ns) >= 0)
 
 
-def x_test_metacat_file_declare_sample(env):
+# Categories -- Don't know how to add them, they show up empty
+#    in hypot, nothing to test?!?
+#
+#def x_test_metacat_category_list(env):
+#    with os.popen("metacat category list", "r") as fin:
+#        data = fin.read()
+#        # check output
+#
+#def x_test_metacat_category_show(env):
+#    with os.popen("metacat category show", "r") as fin:
+#        data = fin.read()
+#        # check output
+#
+def test_metacat_file_declare_sample(env):
     with os.popen("metacat file declare-sample", "r") as fin:
         data = fin.read()
         # check output
+    assert(data.find('"namespace":') >= 0)
+    assert(data.find('"name":') >= 0)
+    assert(data.find('"size":') >= 0)
 
+
+# punting
 def x_test_metacat_file_move(env):
     with os.popen("metacat file move", "r") as fin:
         data = fin.read()
         # check output
 
+# deprecated
 def x_test_metacat_file_add(env):
     with os.popen("metacat file add", "r") as fin:
         data = fin.read()
         # check output
 
-def x_test_metacat_file_datasets(env):
-    with os.popen("metacat file datasets", "r") as fin:
+def test_metacat_file_datasets(env,tst_file_md_list, tst_ds):
+    ns = tst_file_md_list[0]["namespace"]
+    fname = tst_file_md_list[0]["name"]
+    with os.popen(f"metacat file datasets {ns}:{fname}", "r") as fin:
         data = fin.read()
-        # check output
+    assert(data.find(tst_ds) >= 0)
 
-def x_test_metacat_file_update(env):
-    with os.popen("metacat file update", "r") as fin:
+def test_metacat_file_update(env,tst_file_md_list, tst_ds):
+    ns = tst_file_md_list[0]["namespace"]
+    fname = tst_file_md_list[0]["name"]
+    md = '{"foo.bar": "baz"}'
+    with os.popen(f"metacat file update -j -m '{md}' {ns}:{fname}", "r") as fin:
         data = fin.read()
-        # check output
+    assert(data.find("foo.bar") >= 0)
 
-def x_test_metacat_file_update_meta(env):
-    with os.popen("metacat file update-meta", "r") as fin:
+
+def test_metacat_file_update_meta(env,tst_file_md_list, tst_ds):
+    ns = tst_file_md_list[1]["namespace"]
+    fname = tst_file_md_list[1]["name"]
+    md = '{"foo.bar": "baz"}'
+    with os.popen(f"metacat file update-meta -f {ns}:{fname} '{md}'", "r") as fin:
         data = fin.read()
-        # check output
+    with os.popen(f"metacat file show -j -m {ns}:{fname}", "r") as fin:
+        data2 = fin.read()
+    assert(data2.find("foo.bar" ) >= 0)
+
+def test_metacat_dataset_remove_files(env, tst_ds):
+    query = f'(files from {tst_ds}) limit 10'
+    with os.popen(f"metacat dataset remove-files --query '{query}' {tst_ds}" , "r") as fin: 
+        data = fin.read()
+    assert(data.find("Removed 10 files") >= 0)
+
+#=================  below here is largely unfilled-in ==========================
+#  remember to take the x_ off as you fill them en
 
 def x_test_metacat_file_retire(env):
     with os.popen("metacat file retire", "r") as fin:
