@@ -294,28 +294,58 @@ def test_metacat_dataset_remove_files(env, tst_ds):
         data = fin.read()
     assert(data.find("Removed 10 files") >= 0)
 
+
+def test_metacat_file_retire(env,tst_file_md_list, tst_ds):
+    fname = tst_file_md_list[4]["name"]
+    ns = tst_file_md_list[4]["namespace"]
+    with os.popen(f"metacat file retire {ns}:{fname}", "r") as fin:
+        data = fin.read()
+        # check output
+
+def test_metacat_file_name_fid(env,tst_file_md_list, tst_ds):
+    # make sure file name and fid are consistent
+    fname = tst_file_md_list[3]["name"]
+    ns = tst_file_md_list[3]["namespace"]
+    with os.popen(f"metacat file fid {ns}:{fname}", "r") as fin:
+        data = fin.read()
+        fid = data.strip()
+    with os.popen(f"metacat file name {fid}", "r") as fin:
+        data = fin.read()
+        did = data.strip()
+    assert(f"{ns}:{fname}" == did)
+
+def test_metacat_file_show(env,tst_file_md_list, tst_ds):
+    # make sure file name and fid are consistent
+    fname = tst_file_md_list[3]["name"]
+    ns = tst_file_md_list[3]["namespace"]
+    with os.popen(f"metacat file show -j -m {ns}:{fname}", "r") as fin:
+        data = fin.read()
+    assert(data.find(fname) >= 0)
+    assert(data.find(ns) >= 0)
+    assert(json.loads(data))
+
+def test_metacat_validate_good(env,tst_file_md_list, tst_ds):
+    md = tst_file_md_list[0]["metadata"]
+    with open("mdf1", "w") as mdf:
+        json.dump(md, mdf);
+    with os.popen(f"metacat validate mdf1", "r") as fin:
+        data = fin.read()
+    #os.unlink("mdf1")
+    assert(data.strip() == "")
+
+def test_metacat_validate_bad(env,tst_file_md_list, tst_ds):
+    md = tst_file_md_list[0]["metadata"]
+    md["wrong"] = 1
+    with open("mdf1", "w") as mdf:
+        json.dump(md, mdf);
+    with os.popen(f"metacat validate mdf1 2>&1", "r") as fin:
+        data = fin.read()
+    #os.unlink("mdf1")
+    assert(data.find("wrong") >= 0)
+
 #=================  below here is largely unfilled-in ==========================
 #  remember to take the x_ off as you fill them en
 
-def x_test_metacat_file_retire(env):
-    with os.popen("metacat file retire", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_file_name(env):
-    with os.popen("metacat file name", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_file_fid(env):
-    with os.popen("metacat file fid", "r") as fin:
-        data = fin.read()
-        # check output
-
-def x_test_metacat_file_show(env):
-    with os.popen("metacat file show", "r") as fin:
-        data = fin.read()
-        # check output
 
 def x_test_metacat_query_q(env):
     with os.popen("metacat query -q", "r") as fin:
@@ -347,9 +377,4 @@ def x_test_metacat_named_query_search(env):
         data = fin.read()
         # check output
 
-
-def x_test_metacat_validate(env):
-    with os.popen("metacat validate [options]", "r") as fin:
-        data = fin.read()
-        # check output <JSON file with metadata>
 
