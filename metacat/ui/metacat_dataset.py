@@ -407,7 +407,7 @@ class RemoveFilesCommand(CLICommand):
             print(e)
             sys.exit(1)
         else:
-            print("Added", nremoved, "files")
+            print("Removed", nremoved, "files")
 
 class RemoveDatasetCommand(CLICommand):
     
