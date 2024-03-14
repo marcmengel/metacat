@@ -126,6 +126,7 @@ class App(BaseApp, Primitive):
         
     def init(self):
         #print("ScriptHome:", self.ScriptHome)
+        tempdir = os.environ.get("METACAT_SERVER_TEMPLATES_DIR", "server")
         self.initJinjaEnvironment(
             filters={"as_dt_utc":as_dt_utc,
                 "as_dt_local":as_dt_local,
@@ -133,7 +134,7 @@ class App(BaseApp, Primitive):
                 "angle_brackets":angle_brackets,
                 "json": as_json
             },
-            tempdirs=[self.ScriptHome, self.ScriptHome + "/templates"],
+            tempdirs=[tempdir, tempdir + "/templates"],
             globals={
                 "G_Version": Version, 
                 "G_SiteTitle": self.Title,
@@ -154,6 +155,10 @@ def create_application(config=None, prefix=None):
     #print("static_location:", static_location)
     application=App(config, RootHandler, static_location=static_location, prefix=prefix)
     return application
+
+
+application = create_application()
+
 
 if __name__ == "__main__":
     # running from shell
