@@ -1682,7 +1682,7 @@ class DBNamedQuery(DBObject):
     Table = "queries"
     PK = ["namespace", "name"]
 
-    def __init__(self, db, namespace, name, source, parameters, description, metadata):
+    def __init__(self, db, namespace, name, source, parameters, description=None, metadata=None):
         DBObject.__init__(self, db)
         assert namespace is not None and name is not None
         self.Namespace = namespace

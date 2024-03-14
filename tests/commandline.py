@@ -309,7 +309,7 @@ def test_metacat_file_name_fid(env,tst_file_md_list, tst_ds):
     with os.popen(f"metacat file fid {ns}:{fname}", "r") as fin:
         data = fin.read()
         fid = data.strip()
-    with os.popen(f"metacat file name {fid}", "r") as fin:
+    with os.popen(f"metacat file name --did {fid}", "r") as fin:
         data = fin.read()
         did = data.strip()
     assert(f"{ns}:{fname}" == did)
@@ -343,38 +343,56 @@ def test_metacat_validate_bad(env,tst_file_md_list, tst_ds):
     #os.unlink("mdf1")
     assert(data.find("wrong") >= 0)
 
-#=================  below here is largely unfilled-in ==========================
-#  remember to take the x_ off as you fill them en
 
 
-def x_test_metacat_query_q(env):
-    with os.popen("metacat query -q", "r") as fin:
+def test_metacat_query_q(env, tst_file_md_list, tst_ds):
+    with open("qfl1","w") as qf:
+        qf.write(f"files from {tst_ds}")
+    with os.popen("metacat query -q qfl1", "r") as fin:
         data = fin.read()
-        # check output <MQL query file>
+    os.unlink("qfl1")
+    for md in tst_file_md_list[:-1]:
+        assert(data.find(md["name"]) >= 0)
 
-def x_test_metacat_query_mql(env):
-    with os.popen("metacat query", "r") as fin:
+def test_metacat_query_q(env, tst_file_md_list, tst_ds):
+    with open("qfl1","w") as qf:
+        qf.write(f"files from {tst_ds}")
+    with os.popen("metacat query -q qfl1", "r") as fin:
         data = fin.read()
-        # check output query>"
+    os.unlink("qfl1")
+    for md in tst_file_md_list[:-1]:
+        assert(data.find(md["name"]) >= 0)
 
-def x_test_metacat_named_query_create(env):
-    with os.popen("metacat named_query create", "r") as fin:
+def test_metacat_query_mql(env, tst_file_md_list, tst_ds):
+    with open("qfl1","w") as qf:
+        qf.write(f"files from {tst_ds}")
+    with os.popen("metacat query -q qfl1", "r") as fin:
+        data = fin.read()
+    os.unlink("qfl1")
+    for md in tst_file_md_list[:-1]:
+        assert(data.find(md["name"]) >= 0)
+
+
+def test_metacat_named_query_create(env, tst_ds):
+    nqn = f"{os.environ['USER']}:tst_q_{start_ds}"
+    with os.popen(f"metacat named_query create {nqn} 'files from {tst_ds}'", "r") as fin:
         data = fin.read()
         # check output
 
-def x_test_metacat_named_query_show(env):
-    with os.popen("metacat named_query show", "r") as fin:
+def test_metacat_named_query_show(env):
+    nqn = f"{os.environ['USER']}:tst_q_{start_ds}"
+    with os.popen(f"metacat named_query show {nqn}", "r") as fin:
         data = fin.read()
-        # check output
+    assert(data.find(nqn) >= 0)
 
-def x_test_metacat_named_query_list(env):
+def test_metacat_named_query_list(env):
+    nqn = f"{os.environ['USER']}:tst_q_{start_ds}"
     with os.popen("metacat named_query list", "r") as fin:
         data = fin.read()
-        # check output
+    assert(data.find(nqn) >= 0)
 
-def x_test_metacat_named_query_search(env):
-    with os.popen("metacat named_query search", "r") as fin:
+def test_metacat_named_query_search(env):
+    nqn = f"{os.environ['USER']}:tst_q_{start_ds}"
+    with os.popen(f"metacat named_query search {nqn}*", "r") as fin:
         data = fin.read()
-        # check output
-
-
+    assert(data.find(nqn) >= 0)
