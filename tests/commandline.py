@@ -1,11 +1,14 @@
 """
   This file has a commandline based integration test for the metacat
   client and server.
+
+  This suite needs to be run in-order, later tests depend on earlier ones. 
 """
 import os
 import time
 import pytest
 import json
+import time
 
 from env import env, token
 
@@ -79,6 +82,9 @@ def test_metacat_auth_login_token(env, token):
         assert(data.find("User") >= 0)
         assert(data.find("Expires") >= 0)
 
+
+def test_delay():
+    time.sleep(20)
 
 def test_metacat_auth_whoami(env):
     with os.popen("metacat auth whoami", "r") as fin:
@@ -330,7 +336,7 @@ def test_metacat_validate_good(env,tst_file_md_list, tst_ds):
         json.dump(md, mdf);
     with os.popen(f"metacat validate mdf1", "r") as fin:
         data = fin.read()
-    #os.unlink("mdf1")
+    os.unlink("mdf1")
     assert(data.strip() == "")
 
 def test_metacat_validate_bad(env,tst_file_md_list, tst_ds):
@@ -340,7 +346,7 @@ def test_metacat_validate_bad(env,tst_file_md_list, tst_ds):
         json.dump(md, mdf);
     with os.popen(f"metacat validate mdf1 2>&1", "r") as fin:
         data = fin.read()
-    #os.unlink("mdf1")
+    os.unlink("mdf1")
     assert(data.find("wrong") >= 0)
 
 
