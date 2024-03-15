@@ -12,6 +12,11 @@ class MetaEvaluator(object):
         elif attrname == "name":                x = f.Name
         elif attrname == "namespace":           x = f.Namespace
         elif attrname == "size":                x = f.Size
+        elif attrname == "retired":             x = f.Retired
+        elif attrname == "retired_by":          x = f.RetiredBy
+        elif attrname == "retired_timestamp":   x = f.RetiredTimestamp
+        elif attrname == "updated_by":          x = f.UpdatedBy
+        elif attrname == "updated_timetamp":    x = f.UpdatedTimestamp
         return x
 
     def evaluate_meta_expression(self, f, meta_expression):

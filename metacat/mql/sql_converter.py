@@ -184,6 +184,7 @@ class SQLConverter(Ascender):
                         inner join (
                             $arg_sql
                         ) as {c} on {c}.id = {pc}.child_id
+                        where not {p}.retired
                     {order}
                 --  end of parents of {p}
             """, arg_sql=arg_sql)
@@ -212,7 +213,8 @@ class SQLConverter(Ascender):
                         inner join parent_child {pc} on {c}.id = {pc}.child_id
                         inner join (
                             $arg_sql
-                        ) as {p} on {p}.id = {pc}.parent_id
+                        ) as {p} on {p}.id = {pc}.parent_id 
+                        where not {c}.retired
                     {order}
                 -- end of children of {c}
             """, arg_sql=arg_sql)

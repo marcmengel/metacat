@@ -11,5 +11,9 @@ def env():
 
 @pytest.fixture
 def token(env):
-    os.system("htgettoken -i hypot -a htvaultprod.fnal.gov")
-
+    os.system("htgettoken -i hypot -a htvaultprod.fnal.gov ")
+    
+@pytest.fixture
+def auth(token):
+    os.system("metacat auth login -m token $USER")
+    
