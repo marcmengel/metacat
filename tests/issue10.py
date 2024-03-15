@@ -6,7 +6,7 @@ import json
 from env import env, token, auth
 
 
-def test_issue_10(auth):
+def test_issue_10_1(auth):
     # use case from issue 10
     start_ts = int(time.time())
     user = os.environ["USER"]
@@ -43,3 +43,12 @@ def test_issue_10(auth):
     print(f"comparing: '{out1}' '{out2}'")
     assert(out1.find( f"{user}:1mbtestfile.st2024{start_ts}.child1") >= 0)
     assert(out2.find( f"{user}:1mbtestfile.st2024{start_ts}.child1") < 0)
+
+def test_issue_10_2(auth):
+    # make sure we don't barf on updated/retired queries
+    with os.popen(f"""
+ metacat query 'files where updated_by == mengel and updated_timestamp > now 
+       and retired_by == mengel and retired_timestamp > now and retired == false'
+    """) as fin:
+         out = fin.read()
+    assert(out.strip() == "")
