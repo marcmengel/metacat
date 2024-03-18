@@ -47,8 +47,8 @@ def test_issue_10_1(auth):
 def test_issue_10_2(auth):
     # make sure we don't barf on updated/retired queries
     with os.popen(f"""
- metacat query 'files where updated_by == mengel and updated_timestamp > now 
-       and retired_by == mengel and retired_timestamp > now and retired == false'
+ metacat query 'files where updated_by == {os.environ['USER']} and updated_timestamp > now 
+       and retired_by == {os.environ['USER']} and retired_timestamp > now and retired == false'
     """) as fin:
          out = fin.read()
     assert(out.strip() == "")
