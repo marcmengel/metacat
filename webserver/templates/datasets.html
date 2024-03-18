@@ -8,6 +8,7 @@
 <a href="./create_dataset">create</a>
 </p>
 
+<!-- Info: {{info}} -->
 
 <form target="" method="GET">
     <!-- selection: [{{selection}}] -->
@@ -61,13 +62,13 @@
     
     <table class="data">
     	<tr>
-    		<th>Name</th>
+    		<th>Name<a href="./datasets?sort_by=Name&sort_asc=d" style="text-decoration: none">&dArr;</a><a href="./datasets?sort_by=Name&sort_asc=a" style="text-decoration: none">&uArr;</a></th>
             <th>Namespace</th>
-            {% if logged_in %}<th>Creator</th>{% endif %}
-            <th>Created</th>
-            {% if logged_in %}<th>Owner</th>{% endif %}
+            {% if logged_in %}<th>Creator<a href="./datasets?sort_by=Creator&sort_asc=d" style="text-decoration: none">&dArr;</a><a href="./datasets?sort_by=Creator&sort_asc=a" style="text-decoration: none">&uArr;</a></th>{% endif %}
+            <th>Created<a href="./datasets?sort_by=Created&sort_asc=d" style="text-decoration: none">&dArr;</a><a href="./datasets?sort_by=Created&sort_asc=a" style="text-decoration: none">&uArr;</a></th>
+            {% if logged_in %}<th>Owner<a href="./datasets?sort_by=Owner&sort_asc=d" style="text-decoration: none">&dArr;</a><a href="./datasets?sort_by=Owner&sort_asc=a" style="text-decoration: none">&uArr;</a></th>{% endif %}
     		<th>Flags</th>
-    		<th>Files<sup>*</sup></th>
+    		<th>Files<sup>*</sup><a href="./datasets?sort_by=Files&sort_asc=d" style="text-decoration: none">&dArr;</a><a href="./datasets?sort_by=Files&sort_asc=a" style="text-decoration: none">&uArr;</a></th>
             <th>Children</th>
             <th>Subsets</th>
             <th>Parents</th>
