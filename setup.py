@@ -11,14 +11,14 @@ def get_version():
 
 
 setup(
-    name = "metacat",
+    name = "metacat_client",
     version = get_version(),
-    author = "Igor Mandrichenko",
-    author_email = "ivm@fnal.gov",
+    author = "Marc Mengel, Igor Mandrichenko",
+    author_email = "mengel@fnal.gov",
     description = ("MetaCat is a general purpose metadata database. This package is the client side portion of the product."),
     license = "BSD 3-clause",
     keywords = "metadata, data management, database, web service",
-    url = "https://github.com/ivmfnal/metacat",
+    url = "https://github.com/fermitools/metacat",
     packages=['metacat', 'metacat.db', 'metacat.util', 'metacat.webapi', 'metacat.ui', 'metacat.auth', 'metacat.ui.cli', 
                 'metacat.mql', 'metacat.mql.grammar', 'metacat.common', 'metacat.logs'],
     include_package_data = True,
