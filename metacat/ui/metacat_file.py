@@ -15,10 +15,10 @@ class DeclareSampleCommand(CLICommand):
             "namespace":"test",
             "name":"file1.dat",
             "metadata": {
-                "pi": 3.14,
-                "version":"1.0",
-                "format":"raw",
-                "done":True
+                "const.pi": 3.14,
+                "data.version":"1.0",
+                "file.format":"raw",
+                "proj.done":True
             },
             "size": 1234,
             "parents":[
@@ -31,10 +31,10 @@ class DeclareSampleCommand(CLICommand):
             "namespace":"test",
             "name":"file2.dat",
             "metadata": {
-                "e": 2.718,
-                "version":"1.0",
-                "format":"raw",
-                "done":False
+                "const.e": 2.718,
+                "data.version":"1.0",
+                "file.format":"raw",
+                "proj.done":False
             },
             "size": 1734
         },
@@ -42,10 +42,10 @@ class DeclareSampleCommand(CLICommand):
             "namespace":"test2",
             "auto_name":"files_$clock.dat",
             "metadata": {
-                "e": 2.718,
-                "version":"1.0",
-                "format":"raw",
-                "done":False
+                "const.e": 2.718,
+                "data.version":"1.0",
+                "file.format":"raw",
+                "proj.done":False
             },
             "size": 1734
         }

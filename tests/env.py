@@ -1,13 +1,13 @@
 import os
 import pytest
 
-
 production=os.environ.get("METACAT_TEST_PRODUCTION", False)
 
 if not production:
     base = os.path.dirname(os.path.dirname(__file__))
     os.environ["PATH"] = f"{base}/metacat/ui:{os.environ['PATH']}"
     os.environ["PYTHONPATH"] = f"{base}:{os.environ['PYTHONPATH']}"
+
 
 @pytest.fixture
 def env():
