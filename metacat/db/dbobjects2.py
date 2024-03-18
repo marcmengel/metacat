@@ -1385,9 +1385,18 @@ class DBDataset(DBObject):
     
     @transactioned
     def delete(self, transaction=None):
+        # delete attachments to dataset and then the dataset itself
         transaction.execute("""
-            delete from datasets where namespace=%s and name=%s
-        """, (self.Namespace, self.Name))
+            delete from datasets_parent_child where (parent_namespace=%s and parent_name=%s) 
+                  or (child_namespace=%s and child_name=%s);
+            delete from files_datasets where dataset_namespace=%s and dataset_name=%s;
+            delete from datasets where namespace=%s and name=%s;
+        """, (
+          self.Namespace, self.Name,
+          self.Namespace, self.Name,
+          self.Namespace, self.Name,
+          self.Namespace, self.Name,
+        ))
         
     @staticmethod
     def list_datasets(db, patterns, with_children, recursively, limit=None):
@@ -1682,7 +1691,7 @@ class DBNamedQuery(DBObject):
     Table = "queries"
     PK = ["namespace", "name"]
 
-    def __init__(self, db, namespace, name, source, parameters, description, metadata):
+    def __init__(self, db, namespace, name, source, parameters=None, description=None, metadata={}):
         DBObject.__init__(self, db)
         assert namespace is not None and name is not None
         self.Namespace = namespace

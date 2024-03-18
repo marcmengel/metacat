@@ -119,10 +119,43 @@ class ValidateMetadataCommand(CLICommand):
         meta = json.load(open(args[0], "r"))
         if not isinstance(meta, dict):
             raise InvalidArguments("Metadata must be a dictionary")
+
         errors = []
+
+        if "metadata" in meta:
+            # accept file_info with metadata, and check it a bit...
+            if "name" in meta:
+                if not isinstance(meta["name"], str):
+                     errors.append(("name", "Must be a string"))
+                if not isinstance(meta["namespace"], str) :
+                     errors.append(("namespace", "Must be a string"))
+            elif "auto_name" in meta:
+                if not isinstance(meta["auto_name"], str):
+                     errors.append(("auto_name", "Must be a string"))
+                if not isinstance(meta["namespace"], str):
+                     errors.append(("namespace", "Must be a string"))
+            elif "did" in meta:
+                if not isinstance(meta["did"], str):
+                     errors.append(("did", "Must be a string"))
+                if not ":" in meta["did"]:
+                     errors.append(("did", "Must contain a colon"))
+            else:
+                errors.append("!", "file_info must have name, auto_name, or did with metadata")
+            
+            if "size" in meta:
+                if not isinstance(meta["size"], int):
+                     errors.append(("size", "Must be an integer"))
+
+            if "checksums" in meta:
+                if not isinstance(meta["checksums"], dict):
+                     errors.append(("checksums", "Must be a dictionary"))
+
+            # now shift to the metadata for checking
+            meta = meta["metadata"]
+
         for name, value in sorted(meta.items()):
             if not "." in name:
-                errors.append(f"Invalid metadata parameter name: {name} - must be <category>.<name>")
+                errors.append((name, f"Invalid metadata parameter name: {name} - must be <category>.<name>"))
                 continue
             cat, immediate = self.find_category(name)
             if not cat:
@@ -141,8 +174,9 @@ class ValidateMetadataCommand(CLICommand):
 
         if errors:
             if "-q" not in opts:
-                for name, error in errors:
-                    print("%-40s: %s" % (name, error))
+                for name_error in errors:
+                    if name_error:
+                        print("%-40s: %s" % (name_error[0], " ".join(name_error[1:])))
             sys.exit(1)
         else:
             sys.exit(0)
