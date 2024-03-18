@@ -12,6 +12,9 @@ from common_handler import MetaCatHandler, SanitizeException
 class GUICategoryHandler(MetaCatHandler):
     
     def categories(self, request, relpath, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.connect()
         cats = sorted(list(DBParamCategory.list(db)), key=lambda c:c.Path)
         return self.render_to_response("categories.html", categories=cats, **self.messages(args))
@@ -727,6 +730,8 @@ class GUIHandler(MetaCatHandler):
 
     def namespaces(self, request, relpath, all="no", **args):
         user, auth_error = self.authenticated_user()
+        if not user: 
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.App.connect()
         all = all == "yes"
         if all:
