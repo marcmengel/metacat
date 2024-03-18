@@ -12,6 +12,9 @@ from common_handler import MetaCatHandler, SanitizeException
 class GUICategoryHandler(MetaCatHandler):
     
     def categories(self, request, relpath, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.connect()
         cats = sorted(list(DBParamCategory.list(db)), key=lambda c:c.Path)
         return self.render_to_response("categories.html", categories=cats, **self.messages(args))
@@ -21,6 +24,8 @@ class GUICategoryHandler(MetaCatHandler):
     @sanitize()
     def show(self, request, relpath, path=None):
         me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.connect()
         cat = DBParamCategory.get(db, path)
         admin = me.is_admin() if me is not None else False
@@ -215,6 +220,9 @@ class GUIHandler(MetaCatHandler):
         
     @sanitize()
     def index(self, request, relpath, error=None, message=None, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         url = "./datasets"
         if error or message:
             messages = []
@@ -225,6 +233,9 @@ class GUIHandler(MetaCatHandler):
         
     @sanitize()
     def mql(self, request, relpath, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         namespace = request.POST.get("namespace")
         query_text = request.POST.get("query")
         query = None
@@ -262,6 +273,9 @@ class GUIHandler(MetaCatHandler):
 
     @sanitize()
     def show_file(self, request, relpath, fid=None, namespace=None, name=None, did=None, show_form="no", **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.connect()
         f = None
         namespace=namespace and unquote(namespace)
@@ -321,8 +335,10 @@ class GUIHandler(MetaCatHandler):
         # summary is not yet implemented
         #
         
-        db = self.App.connect()
         user, auth_error = self.authenticated_user()
+        if not user:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+        db = self.App.connect()
         user_namespace = None
         if user is not None:
             if DBNamespace.exists(db, user.Username):
@@ -468,6 +484,8 @@ class GUIHandler(MetaCatHandler):
     @sanitize()
     def named_queries(self, request, relpath, namespace=None, **args):
         me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.App.connect()
         queries = list(DBNamedQuery.list(db, namespace))
         return self.render_to_response("named_queries.html", namespace=namespace, queries = queries, logged_in = me is not None,
@@ -476,6 +494,8 @@ class GUIHandler(MetaCatHandler):
     @sanitize()
     def named_query(self, request, relpath, name=None, edit="no", **args):
         me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         namespace, name = parse_name(name, None)
         db = self.App.connect()
         is_admin = me is not None and me.is_admin()
@@ -597,6 +617,9 @@ class GUIHandler(MetaCatHandler):
         
     @sanitize()
     def user(self, request, relpath, username=None, error="", message="", **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         username = username or relpath
         #print("GUI.user(): username:", username)
         db = self.App.connect()
@@ -707,6 +730,8 @@ class GUIHandler(MetaCatHandler):
 
     def namespaces(self, request, relpath, all="no", **args):
         user, auth_error = self.authenticated_user()
+        if not user: 
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.App.connect()
         all = all == "yes"
         if all:
@@ -719,11 +744,13 @@ class GUIHandler(MetaCatHandler):
 
     @sanitize()
     def namespace(self, request, relpath, name=None, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.App.connect()
         ns = DBNamespace.get(db, name)
         roles = []
         edit = False
-        me, auth_error = self.authenticated_user()
         admin = False
         users = None
         if me is not None:
@@ -809,9 +836,11 @@ class GUIHandler(MetaCatHandler):
     
     @sanitize()
     def datasets(self, request, relpath, selection=None, page=0, page_size=1000, **args):
+        user, auth_error = self.authenticated_user()
+        if not user:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         page = int(page)
         page_size = int(page_size)
-        user, auth_error = self.authenticated_user()
         admin = user is not None and user.is_admin()
         db = self.App.connect()
 
@@ -868,6 +897,9 @@ class GUIHandler(MetaCatHandler):
         
     @sanitize()
     def dataset(self, request, relpath, namespace=None, name=None, **args):
+        me, auth_error = self.authenticated_user()
+        if not me:
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
         db = self.App.connect()
         dataset = DBDataset.get(db, namespace, name)
         if dataset is None: self.redirect("./datasets")
@@ -975,10 +1007,10 @@ class GUIHandler(MetaCatHandler):
     @sanitize()
     def save_dataset(self, request, relpath, **args):
         #print("save_dataset:...")
-        db = self.App.connect()
         user, auth_error = self.authenticated_user()
         if not user:
             self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + "/gui/datasets")
+        db = self.App.connect()
         admin = user.is_admin()
         namespace = request.POST["namespace"]
         name = request.POST["name"]
