@@ -835,7 +835,7 @@ class GUIHandler(MetaCatHandler):
             
     
     @sanitize()
-    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, **args):
+    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", **args):
         user, auth_error = self.authenticated_user()
         if not user:
             self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
@@ -860,8 +860,18 @@ class GUIHandler(MetaCatHandler):
         else:
             # assume selection == "all"
             datasets = DBDataset.list(db)
+
+        sort_by_map = {
+             "Name": lambda x: (x.Namespace, x.Name),
+             "Creator": lambda x: x.Creator,
+             "Created": lambda x: x.CreatedTimestamp,
+             "Files": lambda x: x.FileCount,
+        }
             
-        all_datasets = sorted(datasets, key=lambda x: (x.Namespace, x.Name))
+        if not (sort_by in sort_by_map):
+            sort_by = "Name"
+
+        all_datasets = sorted(datasets, key=sort_by_map[sort_by], reverse=(sort_asc != "a"))
         ndatasets = len(all_datasets)
         npages = (ndatasets + page_size - 1) // page_size
         istart = page * page_size
@@ -873,10 +883,10 @@ class GUIHandler(MetaCatHandler):
             ds.GUI_OwnerRole = ns.OwnerRole
             ds.GUI_Authorized = user is not None and (admin or self._namespace_authorized(db, ds.Namespace, user))
 
-        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}" for p in range(npages)]
+        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}" for p in range(npages)]
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
-        return self.render_to_response("datasets.html", datasets=datasets,
+        return self.render_to_response("datasets.html", datasets=datasets, 
             page=page, npages=npages, page_links=page_links,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
