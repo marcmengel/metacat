@@ -12,7 +12,9 @@ import time
 
 from env import env, token, auth
 
-start_ds = int(time.time())
+start_ds = None
+if start_ds is None:
+    start_ds = time.time()
 
 
 @pytest.fixture
@@ -180,6 +182,33 @@ def test_metacat_dataset_files(auth, tst_ds, tst_file_md_list):
     # should list all the files...
     for md in tst_file_md_list:
         assert data.find(md["name"]) > 0
+
+
+def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
+    with open("qfl1", "w") as qf:
+        qf.write(f"files from {tst_ds}")
+    with os.popen("metacat query -q qfl1", "r") as fin:
+        data = fin.read()
+    os.unlink("qfl1")
+    for md in tst_file_md_list[:-1]:
+        assert data.find(md["name"]) >= 0
+
+
+def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
+    with open("qfl1", "w") as qf:
+        qf.write(f"files from {tst_ds}")
+    with os.popen("metacat query -q qfl1", "r") as fin:
+        data = fin.read()
+    os.unlink("qfl1")
+    for md in tst_file_md_list[:-1]:
+        assert data.find(md["name"]) >= 0
+
+
+def test_metacat_query_mql(auth, tst_file_md_list, tst_ds):
+    with os.popen(f"metacat query files from {tst_ds}", "r") as fin:
+        data = fin.read()
+    for md in tst_file_md_list[:-1]:
+        assert data.find(md["name"]) >= 0
 
 
 def test_metacat_dataset_list(auth, tst_ds):
@@ -380,36 +409,6 @@ def test_metacat_validate_bad(auth, tst_file_md_list, tst_ds):
         data = fin.read()
     os.unlink("mdf1")
     assert data.find("wrong") >= 0
-
-
-def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
-    with open("qfl1", "w") as qf:
-        qf.write(f"files from {tst_ds}")
-    with os.popen("metacat query -q qfl1", "r") as fin:
-        data = fin.read()
-    os.unlink("qfl1")
-    for md in tst_file_md_list[:-1]:
-        assert data.find(md["name"]) >= 0
-
-
-def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
-    with open("qfl1", "w") as qf:
-        qf.write(f"files from {tst_ds}")
-    with os.popen("metacat query -q qfl1", "r") as fin:
-        data = fin.read()
-    os.unlink("qfl1")
-    for md in tst_file_md_list[:-1]:
-        assert data.find(md["name"]) >= 0
-
-
-def test_metacat_query_mql(auth, tst_file_md_list, tst_ds):
-    with open("qfl1", "w") as qf:
-        qf.write(f"files from {tst_ds}")
-    with os.popen("metacat query -q qfl1", "r") as fin:
-        data = fin.read()
-    os.unlink("qfl1")
-    for md in tst_file_md_list[:-1]:
-        assert data.find(md["name"]) >= 0
 
 
 def test_metacat_named_query_create(auth, tst_ds):
