@@ -865,14 +865,13 @@ class GUIHandler(MetaCatHandler):
              "Name": lambda x: (x.Namespace, x.Name),
              "Creator": lambda x: x.Creator,
              "Created": lambda x: x.CreatedTimestamp,
-             "Owner": lambda x: x.GUI_OwnerUser,
              "Files": lambda x: x.FileCount,
         }
             
         if not (sort_by in sort_by_map):
             sort_by = "Name"
 
-        all_datasets = sorted(datasets, key=sort_by_map.[sort_by], reverse=(sort_asc != "a"))
+        all_datasets = sorted(datasets, key=sort_by_map[sort_by], reverse=(sort_asc != "a"))
         ndatasets = len(all_datasets)
         npages = (ndatasets + page_size - 1) // page_size
         istart = page * page_size
@@ -884,10 +883,10 @@ class GUIHandler(MetaCatHandler):
             ds.GUI_OwnerRole = ns.OwnerRole
             ds.GUI_Authorized = user is not None and (admin or self._namespace_authorized(db, ds.Namespace, user))
 
-        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}" for p in range(npages)]
+        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}" for p in range(npages)]
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
-        return self.render_to_response("datasets.html", datasets=datasets,
+        return self.render_to_response("datasets.html", datasets=datasets, 
             page=page, npages=npages, page_links=page_links,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
