@@ -835,7 +835,7 @@ class GUIHandler(MetaCatHandler):
             
     
     @sanitize()
-    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, **args):
+    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", **args):
         user, auth_error = self.authenticated_user()
         if not user:
             self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
@@ -860,8 +860,19 @@ class GUIHandler(MetaCatHandler):
         else:
             # assume selection == "all"
             datasets = DBDataset.list(db)
+
+        sort_by_map = {
+             "Name": lambda x: (x.Namespace, x.Name),
+             "Creator": lambda x: x.Creator,
+             "Created": lambda x: x.CreatedTimestamp,
+             "Owner": lambda x: x.GUI_OwnerUser,
+             "Files": lambda x: x.FileCount,
+        }
             
-        all_datasets = sorted(datasets, key=lambda x: (x.Namespace, x.Name))
+        if not (sort_by in sort_by_map):
+            sort_by = "Name"
+
+        all_datasets = sorted(datasets, key=sort_by_map.[sort_by], reverse=(sort_asc != "a"))
         ndatasets = len(all_datasets)
         npages = (ndatasets + page_size - 1) // page_size
         istart = page * page_size

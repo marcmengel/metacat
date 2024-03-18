@@ -61,13 +61,25 @@
     
     <table class="data">
     	<tr>
-    		<th>Name</th>
+    		<th>Name
+                  <a href="./datasets?order_by=Name&asc=a">v</a>
+                  <a href="./datasets?order_by=Name&asc=d">^</a>
+                </th>
             <th>Namespace</th>
             {% if logged_in %}<th>Creator</th>{% endif %}
-            <th>Created</th>
-            {% if logged_in %}<th>Owner</th>{% endif %}
+            <th>Created
+                  <a href="./datasets?order_by=Created&asc=a">v</a>
+                  <a href="./datasets?order_by=Created&asc=d">^</a>
+            </th>
+            {% if logged_in %}<th>Owner
+                  <a href="./datasets?order_by=Owner&asc=a">v</a>
+                  <a href="./datasets?order_by=Owner&asc=d">^</a>
+                   </th>{% endif %}
     		<th>Flags</th>
-    		<th>Files<sup>*</sup></th>
+    		<th>Files<sup>*</sup>
+                  <a href="./datasets?order_by=Files&asc=a">v</a>
+                  <a href="./datasets?order_by=Files&asc=d">^</a>
+                </th>
             <th>Children</th>
             <th>Subsets</th>
             <th>Parents</th>
