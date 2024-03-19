@@ -835,7 +835,7 @@ class GUIHandler(MetaCatHandler):
             
     
     @sanitize()
-    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", **args):
+    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", namematch="", **args):
         user, auth_error = self.authenticated_user()
         if not user:
             self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
@@ -848,18 +848,22 @@ class GUIHandler(MetaCatHandler):
         owned_namespaces = []
         other_namespaces = sorted(all_namespaces.keys())
         selection = selection or ("user" if user is not None else None) or "all"
-        
+
+        namelike = None
+        if namematch:
+            namelike = "%" + namematch.replace("?","_").replace("*","%") + "%"
+
         if user is not None:
             owned_namespaces = sorted([ns.Name for ns in DBNamespace.list(db, owned_by_user=user.Username)])
             other_namespaces = sorted([name for name in all_namespaces.keys() if name not in owned_namespaces])
         if selection == "user":
-            datasets = DBDataset.list(db, namespaces=owned_namespaces)
+            datasets = DBDataset.list(db, namespaces=owned_namespaces, namelike=namelike)
         elif selection.startswith("namespace:"):
             ns = selection[len("namespace:"):]
-            datasets = DBDataset.list(db, namespace=ns)
+            datasets = DBDataset.list(db, namespace=ns, namelike=namelike)
         else:
             # assume selection == "all"
-            datasets = DBDataset.list(db)
+            datasets = DBDataset.list(db, namelike=namelike)
 
         sort_by_map = {
              "Name": lambda x: (x.Namespace, x.Name),
@@ -867,7 +871,7 @@ class GUIHandler(MetaCatHandler):
              "Created": lambda x: x.CreatedTimestamp,
              "Files": lambda x: x.FileCount,
         }
-            
+
         if not (sort_by in sort_by_map):
             sort_by = "Name"
 
@@ -883,11 +887,11 @@ class GUIHandler(MetaCatHandler):
             ds.GUI_OwnerRole = ns.OwnerRole
             ds.GUI_Authorized = user is not None and (admin or self._namespace_authorized(db, ds.Namespace, user))
 
-        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}" for p in range(npages)]
+        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}" for p in range(npages)]
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
         return self.render_to_response("datasets.html", datasets=datasets, 
-            page=page, npages=npages, page_links=page_links,
+            page=page, npages=npages, page_links=page_links, namematch=namematch,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
 
