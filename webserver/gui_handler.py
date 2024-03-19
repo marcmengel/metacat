@@ -835,7 +835,7 @@ class GUIHandler(MetaCatHandler):
             
     
     @sanitize()
-    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", namematch="None", **args):
+    def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", namematch="", **args):
         user, auth_error = self.authenticated_user()
         if not user:
             self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
@@ -891,7 +891,7 @@ class GUIHandler(MetaCatHandler):
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
         return self.render_to_response("datasets.html", datasets=datasets, 
-            page=page, npages=npages, page_links=page_links,
+            page=page, npages=npages, page_links=page_links, namematch=namematch,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
 

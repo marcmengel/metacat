@@ -1338,7 +1338,7 @@ class DBDataset(DBObject):
             sql += " and ds.namespace=%(namespace)s"
         if namespaces is not None:
             sql += " and ds.namespace=any(%(namespace_names)s)"
-        if namelike is not None:
+        if namelike:
             sql += " and ds.name like %(namelike)s"
 
         #print(sql % params)
