@@ -1305,7 +1305,7 @@ class DBDataset(DBObject):
 
     @staticmethod
     @transactioned
-    def list(db, namespace=None, parent_namespace=None, parent_name=None, creator=None, namespaces=None, transaction=None):
+    def list(db, namespace=None, parent_namespace=None, parent_name=None, creator=None, namespaces=None, transaction=None, namelike=None):
         namespace = namespace.Name if isinstance(namespace, DBNamespace) else namespace
         parent_namespace = parent_namespace.Name if isinstance(parent_namespace, DBNamespace) else parent_namespace
         creator = creator.Username if isinstance(creator, DBUser) else creator
@@ -1315,7 +1315,8 @@ class DBDataset(DBObject):
             parent_namespace=parent_namespace,
             parent_name=parent_name,
             creator=creator,
-            namespace_names=namespaces or [] 
+            namespace_names=namespaces or [],
+            namelike=namelike
         )
         columns = DBDataset.columns("ds")
         
@@ -1337,6 +1338,8 @@ class DBDataset(DBObject):
             sql += " and ds.namespace=%(namespace)s"
         if namespaces is not None:
             sql += " and ds.namespace=any(%(namespace_names)s)"
+        if namelike is not None:
+            sql += " and ds.name like %(namelike)s"
 
         #print(sql % params)
         transaction.execute(sql, params)
