@@ -275,7 +275,7 @@ class GUIHandler(MetaCatHandler):
     def show_file(self, request, relpath, fid=None, namespace=None, name=None, did=None, show_form="no", **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"gui/show_file?fid={fid}&namespace={namespace}&name={name}")
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/show_file?fid={fid if fid else ''}&namespace={namespace if namespace else ''}&name={name if name else ''}")
         db = self.connect()
         f = None
         namespace=namespace and unquote(namespace)
@@ -485,7 +485,7 @@ class GUIHandler(MetaCatHandler):
     def named_queries(self, request, relpath, namespace=None, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/named_queries?namespace={namespace}")
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/named_queries?namespace={namespace if namespace else ''}")
         db = self.App.connect()
         queries = list(DBNamedQuery.list(db, namespace))
         return self.render_to_response("named_queries.html", namespace=namespace, queries = queries, logged_in = me is not None,
@@ -838,7 +838,7 @@ class GUIHandler(MetaCatHandler):
     def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", namematch="", **args):
         user, auth_error = self.authenticated_user()
         if not user:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/datasets?selection={selection}&page={page}&page_size={page_size}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}")
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/datasets?selection={selection if selection else ''}&page={page if page else ''}&page_size={page_size if page_size else ''}&sort_by={sort_by if sort_by else ''}&sort_asc={sort_asc}&namematch={namematch}")
         page = int(page)
         page_size = int(page_size)
         admin = user is not None and user.is_admin()
@@ -887,11 +887,10 @@ class GUIHandler(MetaCatHandler):
             ds.GUI_OwnerRole = ns.OwnerRole
             ds.GUI_Authorized = user is not None and (admin or self._namespace_authorized(db, ds.Namespace, user))
 
-        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}" for p in range(npages)]
+        all_page_links = [f"./datasets?selection={selection if selection else ''}&page_size={page_size if page_size else ''}&page={p if p else ''}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}" for p in range(npages)]
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
         return self.render_to_response("datasets.html", datasets=datasets, 
-            selection=selection, 
             page=page, npages=npages, page_links=page_links, namematch=namematch,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
