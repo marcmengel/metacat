@@ -14,7 +14,7 @@ class GUICategoryHandler(MetaCatHandler):
     def categories(self, request, relpath, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + "/gui/categories")
         db = self.connect()
         cats = sorted(list(DBParamCategory.list(db)), key=lambda c:c.Path)
         return self.render_to_response("categories.html", categories=cats, **self.messages(args))
@@ -25,7 +25,7 @@ class GUICategoryHandler(MetaCatHandler):
     def show(self, request, relpath, path=None):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + "/gui/show")
         db = self.connect()
         cat = DBParamCategory.get(db, path)
         admin = me.is_admin() if me is not None else False
@@ -222,7 +222,7 @@ class GUIHandler(MetaCatHandler):
     def index(self, request, relpath, error=None, message=None, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + "/datasets")
         url = "./datasets"
         if error or message:
             messages = []
@@ -235,7 +235,7 @@ class GUIHandler(MetaCatHandler):
     def mql(self, request, relpath, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + "/gui/mql")
         namespace = request.POST.get("namespace")
         query_text = request.POST.get("query")
         query = None
@@ -275,7 +275,7 @@ class GUIHandler(MetaCatHandler):
     def show_file(self, request, relpath, fid=None, namespace=None, name=None, did=None, show_form="no", **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/show_file?fid={fid if fid else ''}&namespace={namespace if namespace else ''}&name={name if name else ''}")
         db = self.connect()
         f = None
         namespace=namespace and unquote(namespace)
@@ -337,7 +337,7 @@ class GUIHandler(MetaCatHandler):
         
         user, auth_error = self.authenticated_user()
         if not user:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/query?query={query}")
         db = self.App.connect()
         user_namespace = None
         if user is not None:
@@ -485,7 +485,7 @@ class GUIHandler(MetaCatHandler):
     def named_queries(self, request, relpath, namespace=None, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/named_queries?namespace={namespace if namespace else ''}")
         db = self.App.connect()
         queries = list(DBNamedQuery.list(db, namespace))
         return self.render_to_response("named_queries.html", namespace=namespace, queries = queries, logged_in = me is not None,
@@ -495,7 +495,7 @@ class GUIHandler(MetaCatHandler):
     def named_query(self, request, relpath, name=None, edit="no", **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/named_query?name={name}")
         namespace, name = parse_name(name, None)
         db = self.App.connect()
         is_admin = me is not None and me.is_admin()
@@ -619,7 +619,7 @@ class GUIHandler(MetaCatHandler):
     def user(self, request, relpath, username=None, error="", message="", **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/user?username={username}")
         username = username or relpath
         #print("GUI.user(): username:", username)
         db = self.App.connect()
@@ -731,7 +731,7 @@ class GUIHandler(MetaCatHandler):
     def namespaces(self, request, relpath, all="no", **args):
         user, auth_error = self.authenticated_user()
         if not user: 
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"gui/namespaces?all={all}")
         db = self.App.connect()
         all = all == "yes"
         if all:
@@ -746,7 +746,7 @@ class GUIHandler(MetaCatHandler):
     def namespace(self, request, relpath, name=None, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/namespace?name={name}")
         db = self.App.connect()
         ns = DBNamespace.get(db, name)
         roles = []
@@ -838,7 +838,7 @@ class GUIHandler(MetaCatHandler):
     def datasets(self, request, relpath, selection=None, page=0, page_size=1000, sort_by="Name", sort_asc="a", namematch="", **args):
         user, auth_error = self.authenticated_user()
         if not user:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/datasets?selection={selection if selection else ''}&page={page if page else ''}&page_size={page_size if page_size else ''}&sort_by={sort_by if sort_by else ''}&sort_asc={sort_asc}&namematch={namematch}")
         page = int(page)
         page_size = int(page_size)
         admin = user is not None and user.is_admin()
@@ -887,11 +887,10 @@ class GUIHandler(MetaCatHandler):
             ds.GUI_OwnerRole = ns.OwnerRole
             ds.GUI_Authorized = user is not None and (admin or self._namespace_authorized(db, ds.Namespace, user))
 
-        all_page_links = [f"./datasets?selection={selection}&page_size={page_size}&page={p}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}" for p in range(npages)]
+        all_page_links = [f"./datasets?selection={selection if selection else ''}&page_size={page_size if page_size else ''}&page={p if p else ''}&sort_by={sort_by}&sort_asc={sort_asc}&namematch={namematch}" for p in range(npages)]
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
         return self.render_to_response("datasets.html", datasets=datasets, 
-            selection=selection, 
             page=page, npages=npages, page_links=page_links, namematch=namematch,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
@@ -914,7 +913,7 @@ class GUIHandler(MetaCatHandler):
     def dataset(self, request, relpath, namespace=None, name=None, **args):
         me, auth_error = self.authenticated_user()
         if not me:
-            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + relpath)
+            self.redirect(self.scriptUri() + "/auth/login?redirect=" + self.scriptUri() + f"/gui/dataset?naemspace={namespace}&name={name}")
         db = self.App.connect()
         dataset = DBDataset.get(db, namespace, name)
         if dataset is None: self.redirect("./datasets")
