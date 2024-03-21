@@ -11,7 +11,7 @@ def get_version():
 
 
 setup(
-    name = "metacat_client",
+    name = "metacat-client",
     version = get_version(),
     author = "Marc Mengel, Igor Mandrichenko",
     author_email = "mengel@fnal.gov",

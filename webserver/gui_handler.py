@@ -891,6 +891,7 @@ class GUIHandler(MetaCatHandler):
         page_links = self.make_page_links(npages, page, page_size, all_page_links, 2)
 
         return self.render_to_response("datasets.html", datasets=datasets, 
+            selection=selection, 
             page=page, npages=npages, page_links=page_links, namematch=namematch,
             owned_namespaces = owned_namespaces, other_namespaces=other_namespaces,
             selection=selection, user=user, **self.messages(args))
