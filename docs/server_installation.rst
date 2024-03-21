@@ -8,7 +8,7 @@ Download and set up
 
     .. code-block:: shell
     
-        $ git clone https://github.com/ivmfnal/metacat
+        $ git clone https://github.com/fermitools/metacat
         $ cd metacat
         $ python setup.py install --user
 
@@ -117,8 +117,8 @@ the following steps:
 
     #. Verify the integrity of the token and check its expiration time;
 
-    #. Get the user record from the ``users`` table of the MetaCat database by the username presented bu the client. If the user
-       record with the given username does not exist - retrun with error;
+    #. Get the user record from the ``users`` table of the MetaCat database by the username presented by the client. If the user
+       record with the given username does not exist - return with error;
     
     #. Get the ``subject`` from the token
     

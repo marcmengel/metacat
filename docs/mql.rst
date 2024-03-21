@@ -3,10 +3,10 @@ MQL - Metadata Query Language
 
 Introduction
 ~~~~~~~~~~~~
-One of the functions of the Metadata Database is to produce list of files matching a set of crieria specidied
+One of the functions of the Metadata Database is to produce a list of files matching a set of crieria specified
 by the user. The product has its own simple language to write these queries in called MQL (pronpounced: MEE-quel,
 like "sequel", but with M). MQL is a language to describe queries against the metadata database.
-A query produces a set of files. By deafult, the order of files in the returned set is not guaranteed and can not be
+A query produces a set of files. By default, the order of files in the returned set is not guaranteed and can not be
 relied on. See  :ref:`Query Results Ordering <ordering>` below for more details.
 
 There are 2 classes of queries - file queries and dataset queries. File queries return list of files
@@ -50,7 +50,7 @@ SQL wildcard notation (% - any substring, _ - any single character) or UNIX file
 (* - any substring, ? - any single character).
 
 The `from <dataset specification>` clause is optional.
-If do not want to limit the query to one or more datasets, you can omit it:
+If you do not want to limit the query to one or more datasets, you can omit it:
 
 .. code-block:: sql
 
@@ -63,7 +63,7 @@ To select files by their explicit namespaces and names:
 .. code-block:: sql
 
     files my_namespace:file_name.data, file1.data, file2.data, 
-                anoher_namespace:file3.data
+                another_namespace:file3.data
 
 
 or by their file ids:
@@ -85,7 +85,7 @@ returns all the files from the ``MyScope:MyDataset``:
 
         files from MyScope:MyDataset
 
-If we add a meta-filter to this query, then the results will be limited to those mathich the specified crireria:
+If we add a meta-filter to this query, then the results will be limited to those matching the specified criteria:
 
 .. code-block:: sql
 
@@ -143,7 +143,7 @@ Dataset attributes:
      * frozen
      * monotonic
  
-Examples of queries uaing file and dataset attributes:
+Examples of queries using file and dataset attributes:
 
 .. code-block:: sql
 
@@ -188,11 +188,11 @@ To get list of parents or children of all files matching certain criteria, use `
         children (
             files from MyScope:MyDataset
                 where params.x > 0.5 and params.x < 1.5 
-                        and dara.run = 123 
+                        and data.run = 123 
                         and ( data.type="MC" or data.type="Data" )
         )
 
-You can use MQL to get parents or children of a single 
+You can use MQL to get parents or children of a single file.
 
 
 If you want to get a list of files without any children, you can use this trick with file set subtraction:
@@ -221,10 +221,10 @@ Queries can be combined using boolean operations *union*, *join*, and subtractio
                 files from MC:Beam where params.e = 10
         )
         
-This query will return files from both datasets. Even if the individual queries happen to produce overallping
+This query will return files from both datasets. Even if the individual queries happen to produce overlapping
 sets of files, each file will appear only *once* in the results of the *union* query.
 
-Queries can be *joined* to procude the intersection of the results of individual queries:
+Queries can be *joined* to produce the intersection of the results of individual queries:
 
 .. code-block:: sql
 
@@ -249,7 +249,7 @@ result set from the first:
 
         files from MC:Beam where params.e1 > 10 - files from MC:Exotics
         
-Although is it not necessary in this example, you can use parethesis and white space to make the query more readable:
+Although is it not necessary in this example, you can use parentheses and white space to make the query more readable:
 
 .. code-block:: sql
 
@@ -280,14 +280,14 @@ The following two queries are equivalent:
 External Filters
 ----------------
 
-The Meatadata Database Query Engine lets the user add custom Python code to be used as a more complicated
-operations on the file sets. They in the Query Language, they are invoked using "filter" keyword:
+The Metadata Database Query Engine lets the user add custom Python code to be used as more complicated
+operations on the file sets. In the Query Language, they are invoked using "filter" keyword:
 
 .. code-block:: sql
 
         filter sample(0.5)( files from s:A )
         
-Here, *filter* the the keyword, *sample* is the name of the Python function to be used to filter the results
+Here, *filter* the keyword, *sample* is the name of the Python function to be used to filter the results
 of the argument query (simple "files from s:A" query in this case). As you can see, you can pass some
 parameters to the function (the number 0.5).
 
@@ -330,7 +330,7 @@ sense that ``sample`` selects ``1/n`` files from the set, starting from first. T
         filter every_nth(100,0)( files from s:A )
 
 **mix** - ``mix`` filter can be used to pick files from multiple datasets. It takes variable number of floating point arguments (``fractions``)
-and the same number of input file sets. The files from the input sets will be picked proportinally to the ``fractions``. Fractions do not have
+and the same number of input file sets. The files from the input sets will be picked proportionally to the ``fractions``. Fractions do not have
 to add up to 1.0. The filter will run until it reaches the end of one of the input datasets. For example:
 
 .. code-block:: sql
@@ -351,14 +351,14 @@ ____________________
 User-defined filters are used to extend MetaCat functionality and as a way to access external metadata and use it to further filter the file sets
 and to inject metadata from external sources into MetaCat query.
 
-A user can define their own filters by supplying a class derived from ``MetaCatFiler`` class imported from ``metacat.filters``.
+A user can define their own filters by supplying a class derived from ``MetaCatFilter`` class imported from ``metacat.filters``.
 The class may have a constructor, which receives a dictionary with configuration parameters and must have a method called ``filter``:
 
 .. code-block:: python
 
-    from metacat.filters import MetaCatFiler
+    from metacat.filters import MetaCatFilter
     
-    class MyFilter(MetaCatFiler):
+    class MyFilter(MetaCatFilter):
     
         def __init__(self, config):
             self.DataSource = ...
@@ -376,7 +376,7 @@ First argument of the ``filter`` method is the list of one or more input file se
 Each input file set is an iterable, not lists. If necessary, the input file set can be converted to a list as ``list(file_set)``, but that needs to
 be done with caution because that will force fetching the entire file set into memory, and that can be very big.
 
-After first parameter, the ``filter`` method can accept some additional positional and keywird parameters passed from MQL. For example, MQL query like this:
+After first parameter, the ``filter`` method can accept some additional positional and keyword parameters passed from MQL. For example, MQL query like this:
 
 .. code-block::
 
@@ -393,7 +393,7 @@ will call the filter() method with the following arguments:
     filter_object.filter([file_set_a, file_set_b], 3, "test", pi=3.14, e=2.18)
     ...
 
-The ``filter`` method is expected to generate a list of file object from the input file sets, possibly augmenting their metadata with some
+The ``filter`` method is expected to generate a list of file objects from the input file sets, possibly augmenting their metadata with some
 data.
 
 MetaCat will create the filter object only once and then call its ``filter`` method for each query. Thus, the filter object may have some persistent state,
@@ -402,11 +402,11 @@ but that feature should be used with caution because:
     * MetaCat server runs in multiple instances on multiple servers, and the instances do not communicate with each other.
     * MetaCat server instance is a multithreaded process and queries are executed on concurrent threads, so some sort of inter-thread synchronization mechanism may need to be used.
 
-Common Namesaces
+Common Namespaces
 ----------------
 
 Typically (but not necessarily), all the datasets mentioned in a query refer to the same namespace.
-You can avoid repeting the same namespace using "with" clause. The following are equivalent:
+You can avoid repeating the same namespace using "with" clause. The following are equivalent:
 
 .. code-block:: 
 
@@ -429,7 +429,7 @@ is invalid:
         with namespace="s"      
                 files from A - files from B
 
-It is invalid becaise the "with" clause applies only to the query it is immediately attached to - "files from A", 
+It is invalid because the "with" clause applies only to the query it is immediately attached to - "files from A", 
 but not to "files from B", so second dataset query lacks the namespace specification for the dataset B.
 
 Here is how it can be corrected:
@@ -536,12 +536,12 @@ Note that while `trigger_bits[all] != 1` will not match, `!(trigger_bits[all] ==
     * ``array[all] != x`` and ``!(array[any] == x)``
     * ``array[any] != x`` and ``!(array[all] == x)``
     
-To use size of the array in an expression, you len(): ``len(data.trigger_mask) > 2``
+To use size of the array in an expression, you use len(): ``len(data.trigger_mask) > 2``
 
 Ranges and Sets
 ~~~~~~~~~~~~~~~
 
-Logical expressins can include ranges or sets of values. Here are some examples:
+Logical expressions can include ranges or sets of values. Here are some examples:
 
     * ``params.x in 3:5`` - if x is scalar, equivalent to ``(params.x >=3 and params.x <= 5)``
     * ``params.x in (3,4,5)`` - if x is scalar, equivalent to ``(params.x==3 or params.x==4 or params.x==5)``
@@ -556,8 +556,8 @@ Sets and ranges can be expressed in terms of floating point numbers and strings:
     * ``params.pi in 3.131:3.152``
     * ``params.values[any] in 3:5``
 
-Note that ``array[any] in low:high`` is `not` equivalent to ``(array[any] >= low and array[any] >= low)`` because former expression means:
-"any element of the array is in the range" while the later one means "any element is greater or equal `low` and the same or another element 
+Note that ``array[any] in low:high`` is `not` equivalent to ``(array[any] >= low and array[any] <= high)`` because former expression means:
+"any element of the array is in the range" while the latter one means "any element is greater or equal `low` and the same or another element 
 of the array is less or equal `high`". For example, consider this metadata:
 
 .. code-block:: json
@@ -657,7 +657,7 @@ Examples:
     date(2020-04-01)                # safe string does not need to be quoted
     date(2020-04-01, -05:00)        # date with the timezone specification, unquoted safe strings
     
-When a ``date`` value it compared to a numeric timestamp, first the numeric timestamp corresponding to the midnight of the specified date
+When a ``date`` value is compared to a numeric timestamp, first the numeric timestamp corresponding to the midnight of the specified date
 in the specified (or UTC) timezone is calculated. Then the timestamp from the metadata is tested whether or not it is in the 24 hours interval
 starting at the calculated timestamp.
 
@@ -812,7 +812,7 @@ Query Results Ordering
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Because sorting query results takes additional time and is not always necessary, 
-by deafult, MetaCat does not sort the file set returned by the query in any particular order, and therefore, can not guarantee
+by default, MetaCat does not sort the file set returned by the query in any particular order, and therefore, can not guarantee
 that the same query will always return results in the same order. However, if necessary, the user can request that the
 query results order is deterministic. To do that, add keyword ``ordered`` to any query:
 
@@ -882,7 +882,7 @@ Dataset query can combine multiple dataset selections separated with comma:
 
 .. code-block:: sql
 
-        datasets mathcing prod:XYZ%_3 having data.type=mc,
+        datasets matching prod:XYZ%_3 having data.type=mc,
                 matching mc:XYZ%_4
     
 To add immediate dataset children:
@@ -893,7 +893,7 @@ To add immediate dataset children:
         with subsets
         having data.type="mc"
 
-This will find all the datasets mathiching the namespace:name pattern, add their immediate children and then filter the resulting set of
+This will find all the datasets matching the namespace:name pattern, add their immediate children and then filter the resulting set of
 datasets by their metadata.
 
 To get all subsets, recursively:
@@ -904,7 +904,7 @@ To get all subsets, recursively:
             test:c with subsets,
             matching test:x*
 
-Dataset name patterns in the above examples use POSIX pattern syntax. They can include eiher '*' to match any substring or '?'
+Dataset name patterns in the above examples use POSIX pattern syntax. They can include either '*' to match any substring or '?'
 to match a single character. SQL style can be used too where '%' will match a substring and '_' will match any single character.
 
 There is also a way to use regular expressions. To do that, the `regexp` keyword must be included after the `matching` keyword
@@ -912,7 +912,7 @@ and the regular expression has to be taken into quotes:
 
 .. code-block:: sql
 
-        datasets mathcing regexp prod:"XYZ_3[a-z0-9]+" having type="mc" and detector="near",
+        datasets matching regexp prod:"XYZ_3[a-z0-9]+" having type="mc" and detector="near",
                 matching regexp mc:"XYZ.*_4"
 
 Combining File and Dataset Metadata Filtering
@@ -958,7 +958,7 @@ Metadata filters can be applied to the named query results:
   files selected by my_namespace:favorite_files
     where run.type = calibration and file.type = raw
     
-Provenance fnctions can be applied to the named query results:
+Provenance functions can be applied to the named query results:
 
 .. code-block:: sql
 

@@ -23,7 +23,7 @@ To get a token using CLI, use ``metacat auth login`` command:
     $ metacat auth login alice
     Password:...
     
-Not all client methods requie any client authentication. Most of read-only methods can be used without any authentication.
+Not all client methods require any client authentication. Most of read-only methods can be used without any authentication.
 Authentication is required to get information about users and roles (these methods are not yet implemented).
 
 MetaCatClient Class Methods Reference
