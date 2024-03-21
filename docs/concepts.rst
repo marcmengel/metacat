@@ -7,9 +7,9 @@ MetaCat is a general purpose metadata catalog. It has 4 major functions:
 
 2. Provide a mechanism to retrieve the metadata associated with a file
 
-3. Efficiently query the metadata database to find files matching the list of crieria expressed in terms of file metadata
+3. Efficiently query the metadata database to find files matching the list of criteria expressed in terms of file metadata
 
-4. Provide a mechanism to seamlessly and efficiently integrate metadata stored in external sources to the query results and use it select files based on their metadata values
+4. Provide a mechanism to seamlessly and efficiently integrate metadata stored in external sources to the query results and use it to select files based on their metadata values
 
 Namespace
 ---------
@@ -22,7 +22,7 @@ File
 ----
 MetaCat is a purely metadata database. Replica management is outside of MetaCat scope. That is why in MetaCat, *file* is
 rather abstract object. 
-File can be a memeber of one or more *Datasets*
+File can be a member of one or more *Datasets*.
 
 MetaCat separates file metadata into two parts, fixed *file attributes* and *flexible metadata* or just *metadata*.
 Flexible metadata can be any JSON dictionary.
@@ -38,7 +38,7 @@ The following are file attributes, they are defined for every file and some of t
 * File size - integer number of bytes
 * Checksums - a dictionary with checksum types and values for the file
 * Parents - file or files used to produce the file
-* Children - files produced from this file. This property is not ectually stored in the database, but rather derived from Parents
+* Children - files produced from this file. This property is not actually stored in the database, but rather derived from Parents
 
 File size and checksums are not used by MetaCat, therefore, depending on the application, they do not have to have meaningful values.
 
@@ -89,12 +89,12 @@ Dataset can define metadata restrictions. They can be used to enforce certain re
 
 Parameter Categories
 --------------------
-All metadata parameters are grouped into categories. Categories may have subcategories. Each metadata parameter name must include st least one dot.
-Parameter categoty is the portion of the parameter name before the last dot and parameter name within the category is the part of the name after
+All metadata parameters are grouped into categories. Categories may have subcategories. Each metadata parameter name must include at least one dot.
+Parameter category is the portion of the parameter name before the last dot and parameter name within the category is the part of the name after
 the last dot. For example, if the full parameter name is ``detector.beam.status``, then the category name is ``detector.beam`` and the parameter name
 is ``status``.
 
-The purpose of the parameter category is to allow adding *metadata constraints* for the parameters in the category. Each constraint defined in terms of:
+The purpose of the parameter category is to allow adding *metadata constraints* for the parameters in the category. Each constraint is defined in terms of:
 
 * The name of the parameter
 * Parameter type (any, int, string, float, dictionary, list, list of ints, etc.)
@@ -116,14 +116,14 @@ The following operations can only be performed by the object owner:
 * Adding a dataset to another dataset - by the parent dataset owner
 * Creating parameter subcategories - if the category is restricted, only by the parent category owner
 * Modifying metadata constraints in the category - by the category owner
-* Create of modify a named query in the namespace - by the namespace owner
+* Create or modify a named query in the namespace - by the namespace owner
 
 Query
 -----
 
 MetaCat query is an algorithm to select files based on the set of criteria defined by the user. Result of a query execution is a *file set*.
-File set is an unordered collection of files, which match given set of criteria at the time when the query is executed.
-Because the contents of the database is dynamic and can change at any time, the same query is *not* guaranteed to always return the same results 
+File set is an unordered collection of files, which match a given set of criteria at the time when the query is executed.
+Because the contents of the database are dynamic and can change at any time, the same query is *not* guaranteed to always return the same results 
 next time it is executed.
 
 Currently, MetaCat does not have a mechanism to specify the order of the resulting file set. Therefore, even if the set of files returned by the 
@@ -146,4 +146,4 @@ The following file and dataset attributes can be used in a metadata query withou
 * create_timestamp - floating point number, standard UNIX epoch timestamp
 * size - file size
 
-Currentyly, queries do not require any authorization.
+Currently, queries do not require any authorization.

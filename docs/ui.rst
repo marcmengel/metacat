@@ -21,7 +21,7 @@ Alternatively, it can be installed from github:
 
   .. code-block:: shell
 
-      $ git clone https://github.com/ivmfnal/metacat.git
+      $ git clone https://github.com/fermitools/metacat.git
       $ cd metacat
       $ python setup.py install --user
       
@@ -56,8 +56,8 @@ General command looks like this:
         $ metacat [-s <server URL>] [-a <auth server URL>] <command> [command options] [arguments ...]
     
     
--a is used to specify the URL for the authenticartion server. It is used only for authentication commands.
--s option specified the server URL. Alternativey, you can define the METACAT_AUTH_SERVER_URL and METACAT_SERVER_URL environment variables:
+-a is used to specify the URL for the authentication server. It is used only for authentication commands.
+-s option specifies the server URL. Alternatively, you can define the METACAT_AUTH_SERVER_URL and METACAT_SERVER_URL environment variables:
 
     .. code-block:: shell
     
@@ -93,7 +93,7 @@ WLCG token, issued by a recognized VO token issuer, can be used as one of suppor
 obtain a MetaCat authentication token.
 
 To obtain a new token, use ``metacat auth login`` command. Currently, 2 authentication mechanisms
-are implemented: password and X.509 certificates. LDAP or MetacCat server "local" password can be used with the
+are implemented: password and X.509 certificates. LDAP or MetaCat server "local" password can be used with the
 password autentication. X.509 method supports both X.509 certificates and proxies.
 
 Token obtained using CLI ``metacat auth login`` command can be further used by both CLI and API until it expires.
@@ -102,7 +102,7 @@ When the MetaCat authentication token expires, the client must obtain new token 
 Password authentication
 .......................
 
-MetaCat gets user passwords from 2 sources: LDAP and MetaCat database. If configures, MetaCat will always present
+MetaCat gets user passwords from 2 sources: LDAP and MetaCat database. If configured, MetaCat will always present
 the password the user presented for authentication to LDAP. In addition, a user can have another password hashed and then
 stored in MetaCat database.
 
@@ -156,7 +156,7 @@ then adding the following DNs to the database has exactly the same effect:
 WLCG token authentication
 .........................
 
-MetaCat supports WLCG tokens authentication. MetaCat client will for the token in the following standard locations:
+MetaCat supports WLCG tokens authentication. MetaCat client will look for the token in the following standard locations:
 
     #. ``BEARER_TOKEN`` environment variable value
     #. contents of a file pointed to by the ``BEARER_TOKEN_FILE`` environment variable
@@ -194,10 +194,10 @@ To see available MetaCat authentication tokens:
     metacat auth list
 
 Export token to a file or to stdout
-
-.. code-block:: shell
     
-    metacat auth token [-o <token file>]
+    .. code-block:: shell
+    
+    metacat auth export [-o|--out <token file>] [<token id>|<server url>]
 	
 On successful authentication, the following command will show your username and the token expiration:
 
@@ -238,7 +238,7 @@ To list existing parameter categories:
         $ metacat category list [options] [<root category>]
                   -j|--json           - print as JSON
 
-To get particular categiry information:
+To get particular category information:
 
 .. code-block:: shell
 
@@ -322,7 +322,7 @@ Note that it is not an error to attempt to add a file if it is already included 
 To add files from a dataset, the user has to be an owner of the dataset namespace either directly or through a role. A user can add any files to a dataset regardless of the file's namespace ownership.
 
 
-Removing files to dataset
+Removing files from dataset
 .........................
 
 .. code-block:: shell
@@ -438,7 +438,7 @@ To declare a file, create a JSON file with file metadata, *without* any file att
         "processing.version": "1.3.5"
     }
 
-then decalre the file specifying file attributes and the metadata as part of the command line:
+then declare the file specifying file attributes and the metadata as part of the command line:
 
 .. code-block:: shell
 
@@ -496,7 +496,7 @@ The following file attributes can be specified:
     Individual parent dictionaries do not have to be in the same format.
     Specifing parents with list of string file ids instead of dictionaries **is deprecated**.
 
-Once the file descrition is ready, it can be used with ``-f`` option:
+Once the file description is ready, it can be used with ``-f`` option:
 
 .. code-block:: shell
 
@@ -577,7 +577,7 @@ You can get a sample of the JSON file:
     
     $ metacat file declare-sample
         
-Once you have the JSON file with files description, you can delare them:
+Once you have the JSON file with files description, you can declare them:
 
 .. code-block:: shell
 
@@ -628,7 +628,7 @@ If the files are specified with their DIDs, then use `-n` option:
     
     $ metacat update -n <namespace>:<name>[,...] metadata.json
     $ metacat update -n <file with DIDs> metadata.json
-    $ metacat update -n - metadata.json             # read file namesspace:name's from stdin
+    $ metacat update -n - metadata.json             # read file namespace:name's from stdin
     
 If the files are specified with their file ids, then use `-i` option:
  
@@ -646,7 +646,7 @@ If you want to replace entire metadata for the files with new dictionary instead
     $ metacat update -r <file with DIDs> metadata.json
 
 
-Updating Signle File Attributes and Metadata
+Updating Single File Attributes and Metadata
 ............................................
 
 The `update` subcommand works with single file, but it allows you to update file attributes such as:
@@ -660,7 +660,7 @@ in addition to the file metadata. The command works in 2 modes:
     * replace - checksums dictionary, metadata and parents and children lists will be replaced with new values
     * add/update - checksums dictionary and metadata will be updated with new values, specified parents/children will be added to existing lists
     
-The command will modify only those attributes included in the command and will not affect other attrubutes. For example:
+The command will modify only those attributes included in the command and will not affect other attributes. For example:
 
 .. code-block:: shell
 
@@ -714,7 +714,7 @@ The command has more options:
       -p|--parents -                      - use '-' with -r to remove all parents
       -c|--children <child>[,...]         - children can be specified with their file ids or DIDs.
                                             if the item contains colon ':', it is interpreted as DID
-      -c|--children -                     - use '-' with -r to remove all choldren
+      -c|--children -                     - use '-' with -r to remove all children
   
       If -u is used together with some individual attributes options, the attributes from the -u file will
       be updated with those coming from the individual attribute options first.
@@ -724,7 +724,7 @@ Moving files into another namespace
 
 To move a set of files to another namespace, use `move` subcommand. There are 2 ways to specify the list of files to move:
 
-    * explsistly listhing their DIDs or file ids
+    * explicitly listing their DIDs or file ids
     * selecting files using an MQL query
     
 To specify files explicitly, use `-f` option:
@@ -781,7 +781,7 @@ Retrieving single file metadata
 Validation
 ..........
 
-Sometimes is it desireable to validate metadata without actually declaring a file. One way of doing this would be to
+Sometimes is it desirable to validate metadata without actually declaring a file. One way of doing this would be to
 use *dry run* mode of the file declaration command. Another way is to use ``metacat validate`` command:
 
 .. code-block:: shell
@@ -864,7 +864,7 @@ MetaCat queries are written in :doc:`Metadata Query Language <mql>`.
             -A|--add-to=<namespace>:<name>      - add files to an existing dataset
             -r|--include-retired-files          - include retired files into the query results
 
-            -x|--explain                        - dp not run the query, show resulting SQL only
+            -x|--explain                        - do not run the query, show resulting SQL only
         
 
     
@@ -905,9 +905,9 @@ To create a named query:
 
 .. code-block:: shell
 
-    $ metacat create [options] <namespace>:<name> <MQL query>         - inline query
-    $ metacat create [options] -f|--file <file> <namespace>:<name>    - read query from file
-    $ metacat create [options] <namespace>:<name>                     - read query from stdin
+    $ metacat named_query create [options] <namespace>:<name> <MQL query>         - inline query
+    $ metacat named_query create [options] -f|--file <file> <namespace>:<name>    - read query from file
+    $ metacat named_query create [options] <namespace>:<name>                     - read query from stdin
     
     Options:
         -u|--update                -- update if the named query exists
@@ -916,7 +916,7 @@ To list existing named queries:
 
 .. code-block:: shell
 
-    $ metacat named_queries list [<options>]
+    $ metacat named_query list [<options>]
     
     Options:
         -n|--namespace                          - include queries from the namespace only
@@ -926,7 +926,7 @@ To show a named query:
 
 .. code-block:: shell
 
-    $ metacat named_queries show [<options>] <namespace>:<name>
+    $ metacat named_query show [<options>] <namespace>:<name>
 
     Options:
         -j|--json                               - as JSON
@@ -936,7 +936,7 @@ To search for named query:
 
 .. code-block:: shell
 
-    $ metacat named_queries search ...
+    $ metacat named_query search ...
     
         search <inline query>                                   - inline query
         search -q|--query <query file>                          - read query from file
