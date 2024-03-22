@@ -835,8 +835,6 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
                  # any that weren't in the error, still need to be declared
                  if to_declare:
                      out = out + self.post_json(url, to_declare)
-                 
-                 print("unretire, etc." , as_required, repr(existing_files))
             else:
                 raise
         #print("webapi: declare_files: out:", out)
