@@ -199,9 +199,7 @@ class DeclareSingleCommand(CLICommand):
       
         response = list(client.declare_files(f"{dataset_namespace}:{dataset_name}", 
                 [file_description], 
-                dry_run = dry_run,
-                as_required = as_required,
-                ))[0]
+                dry_run = dry_run))[0]
 
         if "-j" in opts or "--json" in opts:
             print(json.dumps(response, indent=4, sort_keys=True))
@@ -227,7 +225,6 @@ class DeclareManyCommand(CLICommand):
 
         as_required = opts.get("--as-required")
 
-        print(f"as_required: {as_required}")
         if not as_required in [None, "overwrite", "unretire"]:
             raise InvalidArguments("invalid --as-required value")
 
