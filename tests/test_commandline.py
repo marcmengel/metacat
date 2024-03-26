@@ -10,43 +10,7 @@ import pytest
 import json
 import time
 
-from env import env, token, auth
-
-start_ds = None
-if start_ds is None:
-    start_ds = time.time()
-
-
-@pytest.fixture
-def tst_ds():
-    ds = start_ds
-    return f"{os.environ['USER']}:tst{ds}"
-
-
-@pytest.fixture
-def tst_file_md_list():
-    ds = start_ds
-    mdl = []
-    for i in range(5):
-        fname = f"tst_{ds}_{i}.txt"
-        fcont = f"data file {fname}\n"
-        with open(fname, "w") as fo:
-            fo.write(fcont)
-        with os.popen(f"xrdadler32 {fname}", "r") as fi:
-            hash_n_name = fi.read()
-        fhash, _ = hash_n_name.split(" ")
-        mdl.append(
-            {
-                "name": fname,
-                "namespace": os.environ["USER"],
-                "size": len(fcont),
-                "checksums": {"adler32": fhash},
-                "metadata": {"f.ds": ds},
-            }
-        )
-    yield (mdl)
-    for md in mdl:
-        os.unlink(md["name"])
+from env import env, token, auth, start_ds, tst_ds, tst_file_md_list
 
 
 # need tests for at least:
