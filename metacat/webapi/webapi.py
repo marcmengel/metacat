@@ -724,7 +724,7 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
             info["auto_name"] = auto_name
         return self.declare_files(dataset_did, [info])[0]
 
-    def declare_files(self, dataset, files, namespace=None, dry_run=False):
+    def declare_files(self, dataset, files, namespace=None, dry_run=False, as_required=None):
         """Declare new files and add them to an existing dataset. Requires client authentication.
         
         Arguments
@@ -816,7 +816,27 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
         url = f"data/declare_files?dataset={dataset}"
         if dry_run: url += "&dry_run=yes"
         #print("webapi: declare_files: post...")
-        out = self.post_json(url, lst)
+        try:
+            out = self.post_json(url, lst)
+        except AlreadyExistsError as e:
+            # handle as_required options
+            if as_required:
+                 existing_files = [s.strip() for s in  e.Message.split("\n")][1:]
+                 to_declare = []
+                 out = []
+                 for l in lst:
+                      if f"{l['namespace']}:{l['name']}" in existing_files:
+                          if as_required == "unretire":
+                              self.retire_file(name=l['name'], namespace=l['namespace'], retire=False)
+                          out.append(self.update_file(**l))
+                      else:
+                          to_declare.append(l)
+
+                 # any that weren't in the error, still need to be declared
+                 if to_declare:
+                     out = out + self.post_json(url, to_declare)
+            else:
+                raise
         #print("webapi: declare_files: out:", out)
         return out
         

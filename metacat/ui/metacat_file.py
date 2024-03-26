@@ -58,26 +58,31 @@ class DeclareSampleCommand(CLICommand):
 class DeclareSingleCommand(CLICommand):
     
     DeclareSample = dedent("""\
-        {        
-            "metadata": {
-                "pi": 3.14,
-                "version":"1.0",
-                "format":"raw",
-                "done":true
+        {
+          "namespace": " test",
+          "name": "file1.dat",
+          "metadata": {
+            "const.pi": 3.14,
+            "data.version": "1.0",
+            "file.format": "raw",
+            "proj.done": true
+          },
+          "size": 1234,
+          "parents": [
+            {
+              "fid": "4722545"
             },
-            "size": 1234,
-            "parents":[
-                {"fid":"4722545"},
-                {"did":"my_scope:file_name.data"}, 
-                {"namespace":"my_files", "name":"file_name.data"} 
-            ],
-            "checksums": {
-                "adler32": "1234abcd"
+            {
+              "did": "my_scope:file_name.data"
+            },
+            {
+              "namespace": "my_files",
+              "name": "file_name.data"
             }
+          ]
         }
-    """
-    )
-    
+        """)
+            
     Opts = ("N:p:m:c:da:s:P:jvf:", ["namespace=", "parents=", "metadata=", "checksums=", "dry-run", "auto-name", "size=", "json",
                     "file-description", "sample", "verbose"])
     Usage = """[options] [[<file namespace>:]<filename>] [<dataset namespace>:]<dataset name>
@@ -102,7 +107,7 @@ class DeclareSingleCommand(CLICommand):
             -v|--verbose                        - verbose output
 
             --sample                            - print JSON file description sample
-            
+           
         Note that file attributes from command line override those from JSON file description. 
         If explicit file name is specified, auto-name is ignored.
     """
@@ -191,7 +196,7 @@ class DeclareSingleCommand(CLICommand):
                 print("--- dry run mode ---")
             print(f"File description to be declared and added to dataset {dataset_namespace}:{dataset_name}")
             print(json.dumps(file_description, indent=4, sort_keys=True))
-            
+      
         response = list(client.declare_files(f"{dataset_namespace}:{dataset_name}", 
                 [file_description], 
                 dry_run = dry_run))[0]
@@ -204,11 +209,13 @@ class DeclareSingleCommand(CLICommand):
 class DeclareManyCommand(CLICommand):
     
     MinArgs = 2
-    Opts = ("N:dj", ["namespace=", "dry-run", "json"])
+    Opts = ("N:dj", ["namespace=", "dry-run", "json", "as-required=" ])
     Usage = """[options] <JSON file with file list> <dataset namespace>:<dataset name>
     Declare multiple files:
             -d|--dry-run                        - dry run: run all the checks but stop short of actual file declaration
             -j|--json                           - print results as JSON
+            --as-required=overwrite             - overwrite existing metadata if any
+            --as-required=unretire              - unretire and overwrite existing retired files if any
     """
 
     def __call__(self, command, client, opts, args):
@@ -216,13 +223,18 @@ class DeclareManyCommand(CLICommand):
 
         files = json.load(open(json_file, "r"))       # parse to validate JSON
 
+        as_required = opts.get("--as-required")
+
+        if not as_required in [None, "overwrite", "unretire"]:
+            raise InvalidArguments("invalid --as-required value")
+
         if ':' not in dataset_spec:
             raise InvalidArguments("Invalid dataset specification")
             
         dataset_namespace, dataset_name = undid(dataset_spec)
 
         try:
-            response = client.declare_files(f"{dataset_namespace}:{dataset_name}", files, dry_run = "-d" in opts)
+            response = client.declare_files(f"{dataset_namespace}:{dataset_name}", files, dry_run = "-d" in opts, as_required=as_required)
         except MCError as e:
             print(e)
             sys.exit(1)
