@@ -505,10 +505,12 @@ class DBFile(DBObject):
         meta = json.dumps(self.Metadata or {})
         checksums = json.dumps(self.Checksums or {})
         transaction.execute("""
-            insert into files(id, namespace, name, metadata, size, checksums, creator, created_timestamp) values(%s, %s, %s, %s, %s, %s, %s)
+            insert into files(id, namespace, name, metadata, size, checksums, creator, created_timestamp) values(%s, %s, %s, %s, %s, %s, %s, %s)
                 returning created_timestamp
             """,
-            (self.FID, self.Namespace, self.Name, meta, self.Size, checksums, creator, self.CreatedTimestamp))
+            (self.FID, self.Namespace, self.Name, meta, self.Size, checksums, creator,
+
+                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if self.CreatedTimestamp else null))
         self.CreatedTimestamp = c.fetchone()[0]
         if self.Parents:
             insert_many(self.DB,
@@ -533,14 +535,15 @@ class DBFile(DBObject):
         null = r"\N"
         for f in files:
             f.FID = f.FID or DBFile.generate_id()
-            files_csv.append("%s\t%s\t%s\t%s\t%s\t%s\t%s" % (
+            files_csv.append("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (
                 f.FID,
                 f.Namespace or null, 
                 f.Name or null,
                 json.dumps(f.Metadata) if f.Metadata else '{}',
                 f.Size if f.Size is not None else null,
                 json.dumps(f.Checksums) if f.Checksums else '{}',
-                f.Creator or creator or null
+                f.Creator or creator or null,
+                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if f.CreatedTimestamp else null,
             ))
             f.Creator = f.Creator or creator
             if f.Parents:
@@ -550,7 +553,7 @@ class DBFile(DBObject):
         files_data = "\n".join(files_csv)
         #open("/tmp/files.csv", "w").write(files_data)
         transaction.copy_from(io.StringIO(files_data), "files", 
-                columns = ["id", "namespace", "name", "metadata", "size", "checksums","creator"])
+                columns = ["id", "namespace", "name", "metadata", "size", "checksums","creator", "created_timestamp"])
         transaction.copy_from(io.StringIO("\n".join(parents_csv)), "parent_child", 
                 columns=["child_id", "parent_id"])
             
