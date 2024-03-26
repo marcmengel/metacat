@@ -505,10 +505,10 @@ class DBFile(DBObject):
         meta = json.dumps(self.Metadata or {})
         checksums = json.dumps(self.Checksums or {})
         transaction.execute("""
-            insert into files(id, namespace, name, metadata, size, checksums, creator) values(%s, %s, %s, %s, %s, %s, %s)
+            insert into files(id, namespace, name, metadata, size, checksums, creator, created_timestamp) values(%s, %s, %s, %s, %s, %s, %s)
                 returning created_timestamp
             """,
-            (self.FID, self.Namespace, self.Name, meta, self.Size, checksums, creator))
+            (self.FID, self.Namespace, self.Name, meta, self.Size, checksums, creator, self.CreatedTimestamp))
         self.CreatedTimestamp = c.fetchone()[0]
         if self.Parents:
             insert_many(self.DB,
