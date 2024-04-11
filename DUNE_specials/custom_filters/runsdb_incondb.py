@@ -72,9 +72,9 @@ class RunsDBinConDB(MetaCatFilter):
 
             if need_run_nums:
                 # Get run_hist data
-                data_runhist = folder.getData(0, channel_range=(min(need_run_nums), max(need_run_nums)+1))
+                data_runhist = folder.getData(min(need_run_nums), t1=max(need_run_nums))
                 for row in data_runhist:
-                    runnum, data = row[0], row[4:]
+                    runnum, data = row[1], row[4:]
                     if runnum not in data_by_run:
                         data_by_run[runnum] = data
         
