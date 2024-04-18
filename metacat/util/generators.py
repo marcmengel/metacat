@@ -5,6 +5,8 @@ def fetch_generator(c):
         yield tup
 
 def chunked(iterable, n):
+    if iterable is None:
+        return
     if isinstance(iterable, (list, tuple)):
         for i in range(0, len(iterable), n):
             yield iterable[i:i+n]

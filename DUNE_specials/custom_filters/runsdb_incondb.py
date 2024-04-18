@@ -2,6 +2,7 @@ import re
 from wsdbtools import ConnectionPool
 from condb import ConDB
 from metacat.filters import MetaCatFilter
+from metacat.util.generators import chunked
 
 class RunsDBinConDB(MetaCatFilter):
     """
@@ -54,6 +55,7 @@ class RunsDBinConDB(MetaCatFilter):
 
     def filter(self, inputs, **ignore):
 
+
         # Conect to db via condb python API
         db = ConDB(self.ConnPool)
         folder = db.openFolder(self.FolderName)
@@ -62,9 +64,11 @@ class RunsDBinConDB(MetaCatFilter):
 
         # Get files from metacat input
         file_set = inputs[0]
-        for chunk in file_set.chunked():
+        #for chunk in file_set.chunked():
+        for chunk in chunked(file_set, 500):
             need_run_nums = set()
 
+            #raise RuntimeError("filter -- got a chunk!")
             for f in chunk:
                 runnum = self.file_run_number(f.Metadata)
                 if runnum is not None and runnum not in data_by_run:
