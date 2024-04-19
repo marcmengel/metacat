@@ -85,7 +85,7 @@ class RunsDBinConDB(MetaCatFilter):
             # Insert run hist data to Metacat
             for f in chunk:
                 runnum = self.file_run_number(f.Metadata)
-                if runnum is not None and runnum in data_by_run:
+                if runnum is not None and runnum in data_by_run and data_by_run[runnum] is not None:
                     for (col, typ), value in zip(self.ColumnTypes, data_by_run[runnum]):
                         if typ.startswith("timestamp") and value is not None:
                             value = value.timestamp()
