@@ -138,7 +138,7 @@ class MetaCatHandler(BaseHandler):
             authorized = ns.owned_by_user(user) or user.is_admin() 
             self.NamespaceAuthorizations[namespace] = authorized
         return authorized
-
+ 
     def error_response(self, code, message, reason=None, type="json"):
         reason = reason or _StatusReasons.get(code, "unknown")
         if type == "json":

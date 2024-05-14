@@ -272,6 +272,11 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
 
         auth_server_url = auth_server_url or os.environ.get("METACAT_AUTH_SERVER_URL")
 
+        # using a longer timeout on the server side in case of large
+        # queries, client should too
+        if timeout is None:
+            timeout = 600
+
         TokenAuthClientMixin.__init__(self, server_url, auth_server_url, token=token, token_file=token_file, token_library=token_library)
         HTTPClient.__init__(self, server_url, token=self.token(), timeout=timeout)
         self.MaxConcurrent = max_concurrent_queries
