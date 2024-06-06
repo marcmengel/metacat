@@ -1,7 +1,7 @@
 from metacat.auth.server import BaseHandler
 from metacat.db import DBUser, DBNamespace, DBRole
 import re, json
-
+from metacat.logs import Logged, Logger, init
 
 _StatusReasons = {
     # Status Codes
@@ -96,11 +96,12 @@ def sanitized(method):
         return out
     return decorated
 
-class MetaCatHandler(BaseHandler):
+class MetaCatHandler(BaseHandler, Logged):
     
     def __init__(self, *params, **args):
         BaseHandler.__init__(self, *params, **args)
         self.NamespaceAuthorizations = {}
+        Logged.__init__(self, debug=True, logger=self.App.Logger)
         
     SafePatterns = {
         "any": None,        # no-op
@@ -134,11 +135,26 @@ class MetaCatHandler(BaseHandler):
         if authorized is None:
             ns = DBNamespace.get(db, namespace)
             if ns is None:
-                raise KeyError("Namespace %s does not exist")
+                raise KeyError("Namespace %s does not exist" % (namespace) )
             authorized = ns.owned_by_user(user) or user.is_admin() 
             self.NamespaceAuthorizations[namespace] = authorized
         return authorized
- 
+
+    def _handle_request(self, request, path, path_down, args):
+        response = super()._handle_request(request, path, path_down, args)
+        if isinstance(response, tuple):
+            status = response[0]
+        try:
+            if isinstance(status, int) and status != 200:
+                clientaddr = request.client_addr
+                if clientaddr is not None:
+                    self.log("%s %s %s %s %s" % (clientaddr, response[0], response[1], path, args), who="metacat", channel="error")
+                else:
+                    self.log("%s %s %s %s" % (response[0], response[1], path, args), who="metacat", channel="error")
+        except UnboundLocalError:
+            pass
+        return response
+
     def error_response(self, code, message, reason=None, type="json"):
         reason = reason or _StatusReasons.get(code, "unknown")
         if type == "json":
@@ -147,4 +163,5 @@ class MetaCatHandler(BaseHandler):
         else:
             text = message
             content_type = "text/plain"
+        self.log('%s' % message)
         return code, text, content_type
