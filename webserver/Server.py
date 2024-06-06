@@ -14,6 +14,7 @@ from urllib.parse import quote_plus, unquote_plus
 
 from metacat.util import to_str, to_bytes
 from metacat.common import SignedToken, SignedTokenExpiredError, SignedTokenImmatureError, SignedTokenUnacceptedAlgorithmError, SignedTokenSignatureVerificationError
+from metacat.logs import Logged, Logger
 
 from metacat import Version
 from wsdbtools import ConnectionPool
@@ -87,6 +88,11 @@ class App(BaseApp, Primitive):
         
         self.StaticLocation = static_location
 
+        config_name = os.environ.get("METACAT_SERVER_CFG")
+        instance_name = config_name.split("/")[1].split(".")[0]
+        log_file = "logs/%s.log" % instance_name
+        self.Logger = Logger(log_file)
+
         self.StandardFilters = {}
         self.CustomFilters = {}
 
@@ -148,6 +154,8 @@ def create_application(config=None, prefix=None):
     if config is None:
         print("Configuration file must be provided using METACAT_SERVER_CFG environment variable")
         return None
+    else:
+        os.environ["METACAT_SERVER_CFG"] = config
     if isinstance(config, str):
         config = yaml.load(open(config, "r"), Loader=yaml.SafeLoader)  
     cookie_path = config.get("cookie_path", "/metacat")

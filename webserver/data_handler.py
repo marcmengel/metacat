@@ -112,7 +112,7 @@ class DataHandler(MetaCatHandler):
         db = self.App.connect()
         ns = DBNamespace.get(db, name)
         if ns is None:
-            return "Not found", 404, "text/plain"
+            return 404, "Not found", "text/plain"
         return json.dumps(ns.to_jsonable()), "application/json"
         
     @sanitized
@@ -130,10 +130,10 @@ class DataHandler(MetaCatHandler):
         else:
             r = DBRole.get(db, owner_role)
             if not user.is_admin() and not user.Username in r.members:
-                return 403
+                return 403, "Permission denied"
 
         if DBNamespace.exists(db, name):
-            return "Namespace already exists", 400, "text/plain"
+            return 400, "Namespace already exists", "text/plain"
 
         if description:
             description = unquote_plus(description)
@@ -247,10 +247,12 @@ class DataHandler(MetaCatHandler):
         name = params["name"]
         self.sanitize(namespace=namespace, name=name)
         ns = DBNamespace.get(db, namespace)
+        if ns is None:
+            return 404, "Namespace not found"
         if not user.is_admin() and not ns.owned_by_user(user):
-            return 403
+            return 403, "Permission denied"
         if DBDataset.get(db, namespace, name) is not None:
-            return "Already exists", 409
+            return 409, "Already exists"
 
         creator = user.Username 
 
@@ -286,7 +288,7 @@ class DataHandler(MetaCatHandler):
     @sanitized
     def update_dataset(self, request, relapth, dataset=None):
         if not dataset:
-            return 400, "Dataset is not specfied"
+            return 400, "Dataset is not specified"
         try:    spec = ObjectSpec(dataset)
         except ValueError as e:
             return 400, str(e)
@@ -305,7 +307,7 @@ class DataHandler(MetaCatHandler):
         request_data = json.loads(request.body)
 
         if not user.is_admin() and not self._namespace_authorized(db, namespace, user):
-            return f"Permission to update dataset in namespace {namespace} denied", 403, "text/plain"
+            return 403, f"Permission to update dataset in namespace {namespace} denied", "text/plain"
         
         if "metadata" in request_data:
             meta = request_data["metadata"]
@@ -345,13 +347,13 @@ class DataHandler(MetaCatHandler):
         child_ns = DBNamespace.get(db, child_namespace)
         if not user.is_admin() and not parent_ns.owned_by_user(user):      # allow adding unowned datasets as subsets 
                                                                             # was: or not child_ns.owned_by_user(user)):
-            return 403
+            return 403, "Permission denied"
         parent_ds = DBDataset.get(db, parent_namespace, parent_name)
         if parent_ds is None:
-                return "Parent dataset not found", 404, "text/plain"
+            return 404, "Parent dataset not found", "text/plain"
         child_ds = DBDataset.get(db, child_namespace, child_name)
         if child_ds is None:
-                return "Child dataset not found", 404, "text/plain"
+            return 404, "Child dataset not found", "text/plain"
         
         if any(a.Namespace == child_namespace and a.Name == child_name for a in parent_ds.ancestors()):
             return 400, "Circular connection detected - child dataset is already an ancestor of the parent"
@@ -376,9 +378,9 @@ class DataHandler(MetaCatHandler):
         query_text = params.get("query")
 
         if not file_list and not query_text:
-            return "No files to remove", 400, "text/plain"
+            return 400, "No files to remove", "text/plain"
         if file_list and query_text:
-            return "Either file list or query must be specified, but not both", 400, "text/plain"
+            return 400, "Either file list or query must be specified, but not both", "text/plain"
             
         db = self.App.connect()
         ds_namespace, ds_name = parse_name(dataset)
@@ -389,11 +391,11 @@ class DataHandler(MetaCatHandler):
             return 403, f"Permission to add files dataset {dataset} denied", "text/plain"
         ds = DBDataset.get(db, ds_namespace, ds_name)
         if ds is None:
-            return "Dataset not found", 404, "text/plain"
+            return 404, "Dataset not found", "text/plain"
         if ds.Frozen:
-            return "Dataset is frozen", 403, "text/plain"
+            return 403, "Dataset is frozen", "text/plain"
         if ds.Monotonic:
-            return "Dataset is monotonic", 403, "text/plain"
+            return 403, "Dataset is monotonic", "text/plain"
         
         if query_text:
             query = MQLQuery.parse(query_text)
@@ -416,7 +418,7 @@ class DataHandler(MetaCatHandler):
         if files:
             try:    ds.remove_files(files)
             except MetaValidationError as e:
-                return e.as_json(), 400, "application/json"
+                return 400, e.as_json(), "application/json"
         return json.dumps([f.to_jsonable() for f in files]), "application/json"
 
 
@@ -436,9 +438,9 @@ class DataHandler(MetaCatHandler):
         default_namespace = params.get("namespace")
 
         if not file_list and not query_text:
-            return "No files to add", 400, "text/plain"
+            return 400, "No files to add", "text/plain"
         if file_list and query_text:
-            return "Either file list or query must be specified, but not both", 400, "text/plain"
+            return 400, "Either file list or query must be specified, but not both", "text/plain"
             
         db = self.App.connect()
         ds_namespace, ds_name = parse_name(dataset, default_namespace)
@@ -449,9 +451,9 @@ class DataHandler(MetaCatHandler):
             return 403, f"Permission to add files dataset {dataset} denied", "text/plain"
         ds = DBDataset.get(db, ds_namespace, ds_name)
         if ds is None:
-            return "Dataset not found", 404, "text/plain"
+            return 404, "Dataset not found", "text/plain"
         if ds.Frozen:
-            return "Dataset is frozen", 403, "text/plain"
+            return 403, "Dataset is frozen", "text/plain"
         
         if query_text:
             query = MQLQuery.parse(query_text)
@@ -481,7 +483,7 @@ class DataHandler(MetaCatHandler):
                     ds.FileCount += nadded
                     ds.save(transaction=transaction)
             except MetaValidationError as e:
-                return e.as_json(), 400, "application/json"
+                return 400, e.as_json(), "application/json"
         return json.dumps({"files_added": nadded}), "application/json"
 
     @sanitized
@@ -502,9 +504,9 @@ class DataHandler(MetaCatHandler):
         self.sanitize(namespace=default_namespace, dataset_namespace=ds_namespace, dataset_name=ds_name)
 
         if not file_list and not query_text:
-            return "No files to remove", 400, "text/plain"
+            return 400, "No files to remove", "text/plain"
         if file_list and query_text:
-            return "Either file list or query must be specified, but not both", 400, "text/plain"
+            return 400, "Either file list or query must be specified, but not both", "text/plain"
             
         db = self.App.connect()
         if ds_namespace is None:
@@ -513,11 +515,11 @@ class DataHandler(MetaCatHandler):
             return 403, f"Permission to add files dataset {dataset} denied", "text/plain"
         ds = DBDataset.get(db, ds_namespace, ds_name)
         if ds is None:
-            return "Dataset not found", 404, "text/plain"
+            return 404, "Dataset not found", "text/plain"
         if ds.Frozen:
-            return "Dataset is frozen", 403, "text/plain"
+            return 403, "Dataset is frozen", "text/plain"
         if ds.Monotonic:
-            return "Dataset is monotonic", 403, "text/plain"
+            return 403, "Dataset is monotonic", "text/plain"
         
         resolved = []
         to_resolve = []
@@ -665,17 +667,17 @@ class DataHandler(MetaCatHandler):
         ds_namespace, ds_name = parse_name(dataset, default_namespace)
         try:
             if not self._namespace_authorized(db, ds_namespace, user):
-                return f"Permission to add files to dataset {ds_namespace}:{ds_name} denied", 403
+                return 403, f"Permission to add files to dataset {ds_namespace}:{ds_name} denied"
         except KeyError:
-            return f"Namespace {ds_namespace} does not exist", 404
+            return 404, f"Namespace {ds_namespace} does not exist"
 
         ds = DBDataset.get(db, namespace=ds_namespace, name=ds_name)
         if ds is None:
-            return f"Dataset {ds_namespace}:{ds_name} does not exist", 404
+            return 400, f"Dataset {ds_namespace}:{ds_name} does not exist"
 
         file_list = json.loads(request.body) if request.body else []
         if not file_list:
-            return "Empty file list", 400
+            return 400, "Empty file list"
         files = []
         errors = []
         parents_to_resolve = set()
@@ -688,7 +690,7 @@ class DataHandler(MetaCatHandler):
                     "message":f"Metadata category validation errors",
                     "metadata_errors":item_errors
                 })
-            return json.dumps(errors), METADATA_ERROR_CODE, "application/json"
+            return METADATA_ERROR_CODE, json.dumps(errors), "application/json"
         
         for inx, file_item in enumerate(file_list):
             #print("data_handler.declare_files: file_item:", inx, file_item)
@@ -853,10 +855,10 @@ class DataHandler(MetaCatHandler):
                                 
         if errors:
             #print("data_handler.declare_files: errors:", errors)
-            return json.dumps({
+            return METADATA_ERROR_CODE, json.dumps({
                     "message": "Invalid file data",
                     "metadata_errors": errors
-                    }), METADATA_ERROR_CODE, "application/json"
+                    }), "application/json"
 
         if dry_run:
             return 202, json.dumps(
@@ -909,7 +911,7 @@ class DataHandler(MetaCatHandler):
         
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 403
+            return 403, "Authentication required"
 
         db = self.App.connect()
         data = json.loads(request.body)
@@ -940,10 +942,10 @@ class DataHandler(MetaCatHandler):
     def __update_meta_bulk(self, db, user, new_meta, mode, names=None, ids=None):
         metadata_errors = self.validate_metadata(new_meta)
         if metadata_errors:
-            return json.dumps({
+            return METADATA_ERROR_CODE, json.dumps({
                 "message":"Metadata validation errors",
                 "metadata_errors":metadata_errors
-            }), METADATA_ERROR_CODE, "application/json"
+            }), "application/json"
         
         file_sets = []
         out = []
@@ -971,10 +973,10 @@ class DataHandler(MetaCatHandler):
 
             if metadata_errors:
                 #print("update_files_bulk:", metadata_errors)
-                return json.dumps({
+                return METADATA_ERROR_CODE, json.dumps({
                     "message":"Metadata validation errors",
                     "metadata_errors":metadata_errors
-                }), METADATA_ERROR_CODE, "application/json"
+                }), "application/json"
 
             #
             # check namespace permissions
@@ -983,9 +985,9 @@ class DataHandler(MetaCatHandler):
                 namespace = f.Namespace
                 try:
                     if not self._namespace_authorized(db, namespace, user):
-                        return f"Permission to update files in namespace {namespace} denied", 403
+                        return 403, f"Permission to update files in namespace {namespace} denied"
                 except KeyError:
-                    return f"Namespace {namespace} does not exist", 404
+                    return 404, f"Namespace {namespace} does not exist"
             
                 #
                 # update the metadata
@@ -1024,7 +1026,7 @@ class DataHandler(MetaCatHandler):
         #
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 403
+            return 403, "Authentication required"
         db = self.App.connect()
         #print("request.body:", request.body)
         data = json.loads(request.body)
@@ -1045,7 +1047,7 @@ class DataHandler(MetaCatHandler):
             return 404, "File not found"
 
         if not self._namespace_authorized(db, f.Namespace, user):
-            return 403, "Not authtorized"
+            return 403, "Not authorized"
             
         f.delete()
         return '{"fid":"%s"}' % (f.FID,)
@@ -1060,7 +1062,7 @@ class DataHandler(MetaCatHandler):
         #
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 403
+            return 403, "Authentication required"
         db = self.App.connect()
         data = json.loads(request.body)
         if not isinstance(data, dict):
@@ -1108,10 +1110,10 @@ class DataHandler(MetaCatHandler):
                     return 500, f"Can not load dataset {ds_ns}:{ds_n}"
                 errors += ds.validate_file_metadata(new_metadata)
             if errors:
-                return json.dumps({
+                return METADATA_ERROR_CODE, json.dumps({
                     "message":          "Metadata validation errors",
                     "metadata_errors":  errors
-                }), METADATA_ERROR_CODE, "application/json"
+                }), "application/json"
             f.Metadata = new_metadata
 
         if "checksums" in data:
@@ -1172,7 +1174,7 @@ class DataHandler(MetaCatHandler):
         #
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 403
+            return 403, "Authentication required"
         db = self.App.connect()
         data = json.loads(request.body)
         if not isinstance(data, dict):
@@ -1217,7 +1219,7 @@ class DataHandler(MetaCatHandler):
         else:
             f = DBFile.get(db, namespace=namespace, name=name)
         if f is None:
-            return "File not found", 404
+            return 404, "File not found"
         return f.to_json(with_metadata=with_metadata, with_provenance=with_provenance, with_datasets=with_datasets), "application/json"
         
     @sanitized
@@ -1225,7 +1227,7 @@ class DataHandler(MetaCatHandler):
         #print("retire file...")
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 403
+            return 403, "Authentication required"
 
         data = json.loads(request.body)
         retire = data["retire"]
@@ -1241,9 +1243,9 @@ class DataHandler(MetaCatHandler):
         namespace = f.Namespace
         try:
             if not self._namespace_authorized(db, namespace, user):
-                return f"Permission to manage files in namespace {namespace} denied", 403
+                return 403, f"Permission to manage files in namespace {namespace} denied"
         except KeyError:
-            return f"Namespace {namespace} does not exist", 404
+            return 404, f"Namespace {namespace} does not exist"
         #print("retire_file: doing it: retire:", retire, "  f.Retired:", f.Retired)
         if retire != f.Retired:
             #print("retire_file: doing it: retire:", retire, "  f.Retired:", f.Retired)
@@ -1319,13 +1321,13 @@ class DataHandler(MetaCatHandler):
             ns = DBNamespace.get(db, ds_namespace)
 
             if ns is None:
-                return f"Namespace {ds_namespace} does not exist", 404
+                return 404, f"Namespace {ds_namespace} does not exist"
 
             if not ns.owned_by_user(user):
-                return f"Permission to create a dataset in the namespace {ds_namespace} denied", 403
+                return 403, f"Permission to create a dataset in the namespace {ds_namespace} denied"
 
             if DBDataset.exists(db, ds_namespace, ds_name):
-                return f"Dataset {ds_namespace}:{ds_name} already exists", 409
+                return 409, f"Dataset {ds_namespace}:{ds_name} already exists"
                 
             add_to_dataset = DBDataset(db, ds_namespace, ds_name)
             add_to_dataset.create()
@@ -1336,14 +1338,14 @@ class DataHandler(MetaCatHandler):
             ns = DBNamespace.get(db, add_namespace)
 
             if ns is None:
-                return f"Namespace {add_namespace} does not exist", 404
+                return 404, f"Namespace {add_namespace} does not exist"
 
             if not ns.owned_by_user(user):
-                return f"Permission to add files to dataset in the namespace {add_namespace} denied", 403
+                return 403, f"Permission to add files to dataset in the namespace {add_namespace} denied"
 
             add_to_dataset = DBDataset.get(db, add_namespace, add_name)
             if add_to_dataset is None:
-                return f"Dataset {add_namespace}:{add_name} does not exist", 404
+                return 404, f"Dataset {add_namespace}:{add_name} does not exist"
 
         t0 = time.time()
         if not query_text:
@@ -1432,7 +1434,7 @@ class DataHandler(MetaCatHandler):
         db = self.App.connect()
         q = DBNamedQuery.get(db, namespace, name)
         if q is None:
-            return 404, ""
+            return 404, "Query not found"
         return q.to_json(), "application/json"
     
     @sanitized
@@ -1440,16 +1442,16 @@ class DataHandler(MetaCatHandler):
         update = update == "yes"
         user, error = self.authenticated_user()
         if user is None:
-            return "Authentication required", 401
+            return 401, "Authentication required"
         data = json.loads(request.body)
         db = self.App.connect()
         namespace = data["namespace"]
         name = data["name"]
         try:
             if not self._namespace_authorized(db, namespace, user):
-                return "Permission denied", 403
+                return 403, "Permission denied"
         except KeyError:
-            return f"Namespace {namespace} does not exist", 404
+            return 404, f"Namespace {namespace} does not exist"
         existing = DBNamedQuery.get(db, namespace, name)
         if existing is not None:
             if not update:
