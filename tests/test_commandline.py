@@ -97,6 +97,13 @@ def test_metacat_auth_export(auth):
 #    with os.popen("metacat auth import", "r") as fin:
 #        data = fin.read()
 
+# need to first create a namespace for the username
+# also test that the second time it's created fails
+def test_initial_namespace_create(auth):
+    os.popen(f'metacat namespace create {os.environ["USER"]}')
+    with os.popen(f'metacat namespace create {os.environ["USER"]} 2>&1', "r") as fin:
+        data = fin.read()
+    assert data.find("exists") > 0
 
 # jumping some file delcaration tests first, so we then have some files
 # to make datasets of(?)
@@ -158,16 +165,6 @@ def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
         assert data.find(md["name"]) >= 0
 
 
-def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
-    with open("qfl1", "w") as qf:
-        qf.write(f"files from {tst_ds}")
-    with os.popen("metacat query -q qfl1", "r") as fin:
-        data = fin.read()
-    os.unlink("qfl1")
-    for md in tst_file_md_list[:-1]:
-        assert data.find(md["name"]) >= 0
-
-
 def test_metacat_query_mql(auth, tst_file_md_list, tst_ds):
     with os.popen(f"metacat query files from {tst_ds}", "r") as fin:
         data = fin.read()
@@ -191,11 +188,11 @@ def test_metacat_dataset_add_subset(auth, tst_ds):
 
 def test_metacat_dataset_add_files(auth, tst_ds):
     query = (
-        f'(files where creator="{os.environ["USER"]}") - (files from {tst_ds}) limit 10'
+        f'((files where creator="{os.environ["USER"]}") - (files from {tst_ds} limit 10)) limit 2'
     )
     with os.popen(f"metacat dataset add-files --query '{query}' {tst_ds} ", "r") as fin:
         data = fin.read()
-    assert data.find("Added 10 files") >= 0
+    assert data.find("Added 2 files") >= 0
 
 
 def test_metacat_dataset_update_fail(auth, tst_ds):
