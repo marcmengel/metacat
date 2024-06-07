@@ -100,7 +100,7 @@ def test_metacat_auth_export(auth):
 # need to first create a namespace for the username
 # also test that the second time it's created fails
 def test_initial_namespace_create(auth):
-    os.popen(f'metacat namespace create {os.environ["USER"]}')
+    os.system(f'metacat namespace create {os.environ["USER"]}')
     with os.popen(f'metacat namespace create {os.environ["USER"]} 2>&1', "r") as fin:
         data = fin.read()
     assert data.find("exists") > 0
