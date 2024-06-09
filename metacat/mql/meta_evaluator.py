@@ -56,7 +56,7 @@ class MetaEvaluator(object):
                         break
                 else:
                     result = False
-            elif left.T == "array_subscript":
+            elif left.T == "array_subscript" or left.T == "subscript":
                 inx = left["index"]
                 if not aname in metadata:  return neg
                 lst = metadata[aname]
@@ -93,7 +93,7 @@ class MetaEvaluator(object):
                     if x >= low and x <= high:  return not neg
                 else:
                     return neg
-            elif left.T == "array_subscript":
+            elif left.T == "array_subscript" or left.T == "subscript":
                 aname = left["name"]
                 inx = left["index"]
                 if not aname in metadata:  return neg
@@ -146,7 +146,7 @@ class MetaEvaluator(object):
                         return not neg
                 else:
                     return neg
-            elif left.T == "array_subscript":
+            elif left.T == "array_subscript" or left.T == "subscript":
                 aname = left["name"]
                 inx = left["index"]
                 lst = metadata.get(aname)

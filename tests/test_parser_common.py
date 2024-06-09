@@ -114,3 +114,24 @@ def test_exp_23():
 def test_exp_23():
     assert( eval_expr("(c.n1 in (8,9,10)) or (c.n2 < 19)", {"c.n1": 10, "c.n2": 20} ) )
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# bug cases from Steven Timm
+
+def test_exp_30():
+    assert( eval_expr(
+        "core.runs[1]>=26785 and core.run_type=hd-protodune and core.data_tier=raw",
+        {"core.runs": [1, 26785], "core.run_type": "hd-protodune", "core.data_tier": "raw"},
+    ))
+
+def test_exp_31():
+    assert( eval_expr(
+        "core.runs[1] in (26785,26789,26790,26791,26792,26793,26794) and core.run_type=hd-protodune and core.data_tier=raw",
+        {"core.runs": [1, 26785], "core.run_type": "hd-protodune", "core.data_tier": "raw"},
+    ))
+
+def test_exp_32():
+    assert( eval_expr(
+        "core.runs[1] in 26785:26794  and core.run_type=hd-protodune and core.data_tier=raw",
+        {"core.runs": [1, 26785], "core.run_type": "hd-protodune", "core.data_tier": "raw"},
+    ))
+
