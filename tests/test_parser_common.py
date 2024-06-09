@@ -3,19 +3,25 @@ from env import env
 from metacat.mql.meta_evaluator import MetaEvaluator
 from metacat.mql.mql10 import _Parser, MQLQuery
 
-class mock_file:
-    def __init__(self, md):
-        self.md = md
-    def metadata(self):
-        return self.md
+# routine to make short tests, evaluate an expression against some metadata
 
 def eval_expr(e, md):
     """ evaluate an expression for the given metadata ... """
-    f = mock_file(md)
-    me = MetaEvaluator()
-    pe = MQLQuery.parse(f"files where ( {e} ) ")
+    class mock_file:
+        def __init__(self, md):
+            self.md = md
+        def metadata(self):
+            return self.md
+    f = mock_file(md)      # fake file with this metadata
+    me = MetaEvaluator()   # metadata expression evaluator
+
+    # we parse a whole "files where ..." expression, then pick out the where clause to evaluate
+
+    pe = MQLQuery.parse(f"files where {e}")
     return me( f, pe.Tree.D['query'].Wheres )
 
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # testing == and != 
 
 def test_exp_1():
@@ -30,6 +36,7 @@ def test_exp_3():
 def test_exp_4():
     assert( not eval_expr("c.n2 != 20", {"c.n1": 10, "c.n2": 20} ) )
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # testing various "in" combinations
 
 def test_exp_5():
@@ -44,7 +51,8 @@ def test_exp_5():
 def test_exp_6():
     assert( not eval_expr("c.n1 not in 9:11", {"c.n1": 10, "c.n2": 20} ) )
 
-# test present
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# test 'present'
 
 def test_exp_7():
     assert( eval_expr("c.n1 present", {"c.n1": 10, "c.n2": 20} ) )
@@ -52,7 +60,8 @@ def test_exp_7():
 def test_exp_8():
     assert( not eval_expr("c.n1 not present", {"c.n1": 10, "c.n2": 20} ) )
 
-# test reverse in
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# test constant in metadata-field
 
 def test_exp_9():
     assert( eval_expr("10 in c.n1", {"c.n1": [8,9,10], "c.n2": 20} ) )
@@ -66,6 +75,7 @@ def test_exp_10_1():
 def test_exp_10_2():
     assert( not eval_expr("6 in c.n1", {"c.n1": [8,9,10], "c.n2": 20} ) )
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # test less/greater/equal
 
 def test_exp_11():
@@ -80,11 +90,13 @@ def test_exp_13():
 def test_exp_13():
     assert( eval_expr("c.n1 > 9", {"c.n1": 10, "c.n2": 20} ) )
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # test regex match
 
 def test_exp_14():
     assert( eval_expr("c.s1 ~ 'a.*b'", {"c.s1": "xaxyzby", "c.n2": 20} ) )
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # test and, or...
 
 def test_exp_20():
