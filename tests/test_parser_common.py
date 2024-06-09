@@ -3,7 +3,7 @@ from env import env
 from metacat.mql.meta_evaluator import MetaEvaluator
 from metacat.mql.mql10 import _Parser, MQLQuery
 
-# routine to make short tests, evaluate an expression against some metadata
+# routine to make short tests: evaluate an expression against some metadata
 
 def eval_expr(e, md):
     """ evaluate an expression for the given metadata ... """
