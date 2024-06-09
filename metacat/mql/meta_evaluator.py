@@ -109,8 +109,6 @@ class MetaEvaluator(object):
                     return neg
                 l = len(lst)
                 return (l >= low and l <= high) != neg
-            else:
-                print(f"in_range if, left.T == '{left.T}'")
         elif op == "cmp_op":
             cmp_op = meta_expression["op"]
             left, right = args
