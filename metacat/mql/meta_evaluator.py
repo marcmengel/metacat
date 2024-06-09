@@ -40,7 +40,7 @@ class MetaEvaluator(object):
             vset = set(meta_expression.get("set", []))
             left = args[0]
             aname = left["name"]
-            if left.T == "scalar":
+            if left.T == "scalar" or left.T == "meta_attribute":
                 v = metadata.get(aname)
                 result = v in vset
             elif left.T == "object_attribute":
@@ -75,7 +75,7 @@ class MetaEvaluator(object):
             low, high = meta_expression["low"], meta_expression["high"]
             left = args[0]
             neg = meta_expression.get("neg", False) != (op == "not_in_range")
-            if left.T == "scalar":
+            if left.T == "scalar" or left.T == "meta_attribute":
                 aname = left["name"]
                 try:    return (aname in metadata and metadata[aname] >= low and metadata[aname] <= high) != neg
                 except: return neg
@@ -109,6 +109,8 @@ class MetaEvaluator(object):
                     return neg
                 l = len(lst)
                 return (l >= low and l <= high) != neg
+            else:
+                print(f"in_range if, left.T == '{left.T}'")
         elif op == "cmp_op":
             cmp_op = meta_expression["op"]
             left, right = args
