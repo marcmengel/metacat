@@ -30,7 +30,7 @@ class MetaEvaluator(object):
         if op == "meta_and":    op = "and"
         if op == "meta_or":     op = "or"
         if op in self.BOOL_OPS:
-            return self.eval_meta_bool(metadata, op, args)
+            return self.eval_meta_bool(f, op, args)
         elif op == "present":
             return meta_expression["name"] in metadata
         elif op == "not_present":
@@ -129,6 +129,7 @@ class MetaEvaluator(object):
                     traceback.print_exc()
                     return False
             elif left.T == "array_any":
+                neg = meta_expression.get("neg", False)
                 aname = left["name"]
                 lst = metadata.get(aname)
                 #print("lst:", lst)
@@ -138,13 +139,13 @@ class MetaEvaluator(object):
                 elif isinstance(lst, list):
                     attr_values = lst
                 else:
-                    return False
+                    return neg
                 for av in attr_values:
                     #print("comparing", av, cmp_op, value)
                     if self.do_cmp_op(av, cmp_op, value):
-                        return True
+                        return not neg
                 else:
-                    return False
+                    return neg
             elif left.T == "array_subscript":
                 aname = left["name"]
                 inx = left["index"]
