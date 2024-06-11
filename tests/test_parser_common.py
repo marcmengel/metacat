@@ -87,13 +87,13 @@ def test_exp_12():
 def test_exp_13():
     assert( eval_expr("c.n1 < 11", {"c.n1": 10, "c.n2": 20} ) )
 
-def test_exp_13():
+def test_exp_14():
     assert( eval_expr("c.n1 > 9", {"c.n1": 10, "c.n2": 20} ) )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # test regex match
 
-def test_exp_14():
+def test_exp_15():
     assert( eval_expr("c.s1 ~ 'a.*b'", {"c.s1": "xaxyzby", "c.n2": 20} ) )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -111,7 +111,7 @@ def test_exp_22():
 def test_exp_23():
     assert( eval_expr("(c.n1 in 8:11) or (c.n2 < 19)", {"c.n1": 10, "c.n2": 20} ) )
 
-def test_exp_23():
+def test_exp_24():
     assert( eval_expr("(c.n1 in (8,9,10)) or (c.n2 < 19)", {"c.n1": 10, "c.n2": 20} ) )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
