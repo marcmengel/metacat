@@ -45,10 +45,10 @@ def test_exp_5():
 def test_exp_6():
     assert( eval_expr("c.n1 in 9:11", {"c.n1": 10, "c.n2": 20} ) )
 
-def test_exp_5():
+def test_exp_5n():
     assert( not eval_expr("c.n1 not in (9,10,11)", {"c.n1": 10, "c.n2": 20} ) )
 
-def test_exp_6():
+def test_exp_6n():
     assert( not eval_expr("c.n1 not in 9:11", {"c.n1": 10, "c.n2": 20} ) )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
