@@ -148,7 +148,7 @@ def test_metacat_dataset_files(auth, tst_ds, tst_file_md_list):
         assert data.find(md["name"]) > 0
 
 
-def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
+def test_metacat_query_q_1(auth, tst_file_md_list, tst_ds):
     with open("qfl1", "w") as qf:
         qf.write(f"files from {tst_ds}")
     with os.popen("metacat query -q qfl1", "r") as fin:
@@ -158,7 +158,7 @@ def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
         assert data.find(md["name"]) >= 0
 
 
-def test_metacat_query_q(auth, tst_file_md_list, tst_ds):
+def test_metacat_query_q_2(auth, tst_file_md_list, tst_ds):
     with open("qfl1", "w") as qf:
         qf.write(f"files from {tst_ds}")
     with os.popen("metacat query -q qfl1", "r") as fin:
