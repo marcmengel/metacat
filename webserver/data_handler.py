@@ -33,6 +33,12 @@ class DataHandler(MetaCatHandler):
         MetaCatHandler.__init__(self, request, app)
         self.Categories = None
         self.Datasets = {}            # {(ns,n)->DBDataset}
+        # for validate_checksums, below...
+        self.expected_len = {
+           "adler32": 8,
+           "sha256": 64,
+           "md5": 32,
+        }
         
     def load_categories(self):
         if self.Categories is None:
@@ -1052,6 +1058,17 @@ class DataHandler(MetaCatHandler):
         f.delete()
         return '{"fid":"%s"}' % (f.FID,)
 
+    def validate_checksums(self, data, errors):
+        """validate checksums are in hex and of appropriate length """
+
+        for ct in data["checksums"]:
+            cs = data["checksums"][ct]
+            ct = ct.lower()
+            if ct in self.expected_len and len(cs) < self.expected_len[ct]:
+                errors.append(f"checksum {ct} value is too short")
+            for c in cs:
+                if not ((c >= "0" and c <= "9") or (c >= "a" and c <= "f")):
+                   errors.append(f"checksum {ct} contains invalid digit {c}")
 
     @sanitized
     def update_file(self, request, relpath, **args):
@@ -1086,10 +1103,8 @@ class DataHandler(MetaCatHandler):
 
         mode = data.get("mode", "add-update")
 
-        new_metadata = f.Metadata.copy()
+        errors = []
         if "metadata" in data:
-
-            errors = []
             for k in data["metadata"].keys():
                 if '.' not in k:
                     errors.append({
@@ -1098,10 +1113,10 @@ class DataHandler(MetaCatHandler):
                     })
 
             if mode == "add-update":
+                new_metadata = f.Metadata.copy()
                 new_metadata.update(data["metadata"])
             else:
                 new_metadata = data["metadata"]
-
 
             # validate new metadata against file datasets
             for ds_ns, ds_n in f.datasets:
@@ -1109,20 +1124,32 @@ class DataHandler(MetaCatHandler):
                 if ds is None:
                     return 500, f"Can not load dataset {ds_ns}:{ds_n}"
                 errors += ds.validate_file_metadata(new_metadata)
+        
+            if not errors:
+                f.Metadata = new_metadata
+
+        if "checksums" in data:
+            validate_checksums(data, errors)
             if errors:
                 return METADATA_ERROR_CODE, json.dumps({
                     "message":          "Metadata validation errors",
                     "metadata_errors":  errors
                 }), "application/json"
-            f.Metadata = new_metadata
-
-        if "checksums" in data:
-            new_checksums = (f.Checksums or {}).copy()
+               
             if mode == "add-update":
+                new_checksums = (f.Checksums or {}).copy()
                 new_checksums.update(data["checksums"])
             else:
                 new_checksums = data["checksums"]
-            f.Checksums = new_checksums
+
+            if not errors:
+                f.Checksums = new_checksums
+
+        if errors:
+            return METADATA_ERROR_CODE, json.dumps({
+                "message":          "Metadata validation errors",
+                "metadata_errors":  errors
+            }), "application/json"
 
         if "parents" in data:
             # parents are specified as dictionaries either {"fid":...} or {"namespace":..., "name":...}
