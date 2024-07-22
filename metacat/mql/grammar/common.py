@@ -60,7 +60,7 @@ index:  STRING
 META_NAME: WORD ("." WORD)+                            // meta attribute has to have a dot in the name
 OBJECT_ATTRIBUTE: WORD
 
-FNAME: LETTER ("_"|"-"|"."|LETTER|DIGIT|"/")*
+FNAME: ("_"|"-"|"."|LETTER|DIGIT|"/")+
 
 FID: ("_"|"-"|"."|LETTER|DIGIT|"/")+
 
