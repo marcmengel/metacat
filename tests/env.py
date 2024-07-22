@@ -51,7 +51,7 @@ def tst_ds():
 def tst_file_md_list():
     ds = start_ds
     mdl = []
-    for i in range(5):
+    for i in range(15):
         fname = f"tst_{ds}_{i}.txt"
         fcont = f"data file {fname}\n"
         with open(fname, "w") as fo:
