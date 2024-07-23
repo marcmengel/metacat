@@ -693,10 +693,28 @@ class DataHandler(MetaCatHandler):
             for index, item_errors in metadata_validation_errors:
                 errors.append({
                     "index": index,
-                    "message":f"Metadata category validation errors",
+                    "message":"Metadata category validation errors",
                     "metadata_errors":item_errors
                 })
-            return METADATA_ERROR_CODE, json.dumps(errors), "application/json"
+            return METADATA_ERROR_CODE, json.dumps({"metadata_errors": errors}), "application/json"
+
+        checksum_validation_errors = []
+        index = 0
+        checksum_errors = False
+        for f in file_list:
+            item_errors = []
+            self.validate_checksums(f,item_errors)
+            if item_errors:
+                checksum_validation_errors = True
+                errors.append({
+                    "index": index,
+                    "message":"Metadata checksum validation errors",
+                    "metadata_errors": item_errors
+                })
+            index = index + 1
+
+        if checksum_validation_errors:
+            return METADATA_ERROR_CODE, json.dumps({"metadata_errors": errors}), "application/json"
         
         for inx, file_item in enumerate(file_list):
             #print("data_handler.declare_files: file_item:", inx, file_item)
@@ -1065,10 +1083,10 @@ class DataHandler(MetaCatHandler):
             cs = data["checksums"][ct]
             ct = ct.lower()
             if ct in self.expected_len and len(cs) < self.expected_len[ct]:
-                errors.append(f"checksum {ct} value is too short")
+                errors.append({"name": f"checksum {ct}", "reason":"value is too short"})
             for c in cs:
                 if not ((c >= "0" and c <= "9") or (c >= "a" and c <= "f")):
-                   errors.append(f"checksum {ct} contains invalid digit {c}")
+                    errors.append({"name":f"checksum {ct}", "reason": f"contains invalid digit {c}"})
 
     @sanitized
     def update_file(self, request, relpath, **args):
@@ -1129,7 +1147,7 @@ class DataHandler(MetaCatHandler):
                 f.Metadata = new_metadata
 
         if "checksums" in data:
-            validate_checksums(data, errors)
+            self.validate_checksums(data, errors)
             if errors:
                 return METADATA_ERROR_CODE, json.dumps({
                     "message":          "Metadata validation errors",
