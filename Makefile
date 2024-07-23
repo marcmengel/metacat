@@ -1,5 +1,5 @@
 PRODUCT=metacat
-BUILD_DIR=$(TMPDIR)/build/$(PRODUCT)
+BUILD_DIR=$(HOME)/build/$(PRODUCT)
 TARDIR=/tmp/$(USER)
 LIBDIR=$(BUILD_DIR)/lib
 MODULEDIR=$(LIBDIR)/metacat
