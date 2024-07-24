@@ -1082,8 +1082,11 @@ class DataHandler(MetaCatHandler):
         for ct in data["checksums"]:
             cs = data["checksums"][ct]
             ct = ct.lower()
-            if ct in self.expected_len and len(cs) < self.expected_len[ct]:
-                errors.append({"name": f"checksum {ct}", "reason":"value is too short"})
+            if ct in self.expected_len and len(cs) != self.expected_len[ct]:
+                errors.append({
+                    "name": f"checksum {ct}", 
+                    "reason":f"value is wrong length {len(cs)} should be {self.expected_len[ct]}",
+            })
             for c in cs:
                 if not ((c >= "0" and c <= "9") or (c >= "a" and c <= "f")):
                     errors.append({"name":f"checksum {ct}", "reason": f"contains invalid digit {c}"})
