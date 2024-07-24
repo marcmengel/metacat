@@ -313,10 +313,16 @@ def test_metacat_file_update_meta(auth, tst_file_md_list, tst_ds):
     ns = tst_file_md_list[1]["namespace"]
     fname = tst_file_md_list[1]["name"]
     md = '{"foo.bar": "baz"}'
-    with os.popen(f"metacat file update-meta -f {ns}:{fname} '{md}'", "r") as fin:
+    cmd=f"metacat file update-meta -f {ns}:{fname} '{md}'"
+    print(cmd)
+    with os.popen(cmd, "r") as fin:
         data = fin.read()
-    with os.popen(f"metacat file show -j -m {ns}:{fname}", "r") as fin:
+    print(data)
+    cmd2 = f"metacat file show -j -m {ns}:{fname}"
+    print(cmd2)
+    with os.popen(cmd2 , "r") as fin:
         data2 = fin.read()
+    print(data2)
     assert data2.find("foo.bar") >= 0
 
 
