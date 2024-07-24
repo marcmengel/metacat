@@ -23,7 +23,8 @@ def test_metacat_dataset_create(auth, tst_ds):
 
 def test_metacat_file_declare_bad_chksum_1(auth, tst_file_md_list, tst_ds):
     # add a file we did before, with ck1 on the filename, and
-    # a funky adler32 checksum, should report bad digits
+    # a 4-char adler32 checksum -- this should fail due to the checksum
+    # being short.
     tst_ds =  tst_ds + "_cksum"
     md = tst_file_md_list[0].copy()
     md["name"] = "ck1_" + md["name"]
@@ -40,8 +41,7 @@ def test_metacat_file_declare_bad_chksum_1(auth, tst_file_md_list, tst_ds):
 
 def test_metacat_file_declare_bad_chksum_2(auth, tst_file_md_list, tst_ds):
     # add a file we did before, with ck1 on the filename, and
-    # a 4-char adler32 checksum -- this should fail due to the checksum
-    # being short.
+    # a funky adler32 checksum, should report bad digits
     tst_ds =  tst_ds + "_cksum"
     md = tst_file_md_list[0].copy()
     md["name"] = "ck1_" + md["name"]
