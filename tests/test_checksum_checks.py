@@ -37,7 +37,7 @@ def test_metacat_file_declare_bad_chksum_1(auth, tst_file_md_list, tst_ds):
     print(f"got data: '{data}'")
     os.unlink("mdf1")
     assert data.find("validation error") > 0
-    assert data.find("adler32: value is too short") > 0
+    assert data.find("adler32: value is wrong length ") > 0
 
 def test_metacat_file_declare_bad_chksum_2(auth, tst_file_md_list, tst_ds):
     # add a file we did before, with ck1 on the filename, and
