@@ -437,14 +437,14 @@ class ShowCommand(CLICommand):
             pprint.pprint(data)
         else:
             for k, v in sorted(data.items()):
-                if k == "checksums":
+                if k == "checksums" and v:
                     print("checksums:")
                     for typ, cksum in sorted(v.items()):
                         print("    %-10s: %s" % (typ, cksum))
-                elif k == "created_timestamp":
+                elif k == "created_timestamp" and v:
                     t = datetime.fromtimestamp(v, timezone.utc)
                     print("%-20s:\t%s" % (k, t))
-                elif k not in ("metadata", "parents", "children", "datasets"):
+                elif k not in ("metadata", "parents", "children", "datasets") and v:
                     print("%-20s:\t%s" % (k, v))
 
             if "metadata" in data:

@@ -366,6 +366,16 @@ def test_metacat_file_show(auth, tst_file_md_list, tst_ds):
     assert data.find(ns) >= 0
     assert json.loads(data)
 
+def test_metacat_file_show2(auth, tst_file_md_list, tst_ds):
+    # make sure file name and fid are consistent
+    fname = tst_file_md_list[3]["name"]
+    ns = tst_file_md_list[3]["namespace"]
+    with os.popen(f"metacat file show -m {ns}:{fname}", "r") as fin:
+        data = fin.read()
+    assert data.find(fname) >= 0
+    assert data.find(ns) >= 0
+    assert json.loads(data)
+
 
 def test_metacat_validate_good(auth, tst_file_md_list, tst_ds):
     md = tst_file_md_list[0]["metadata"]
