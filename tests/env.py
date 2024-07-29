@@ -72,4 +72,7 @@ def tst_file_md_list():
         )
     yield (mdl)
     for md in mdl:
-        os.unlink(md["name"])
+        try:
+            os.unlink(md["name"])
+        except:
+            pass
