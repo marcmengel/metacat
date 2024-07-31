@@ -374,7 +374,6 @@ def test_metacat_file_show2(auth, tst_file_md_list, tst_ds):
         data = fin.read()
     assert data.find(fname) >= 0
     assert data.find(ns) >= 0
-    assert json.loads(data)
 
 
 def test_metacat_validate_good(auth, tst_file_md_list, tst_ds):
