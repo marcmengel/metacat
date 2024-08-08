@@ -27,8 +27,17 @@ class TokenAuthClientMixin(object):
         self.TokenFile = token_file
         self.Token = token 
         if self.Token is None: self.Token = self.token()      # load from file/lib if needed
+
+    def auth_refresh(self):
+        """ refresh our token from the token file if it has been updated """
+        curtime = time.time()
+        libtime = os.stat(self.TokenLib.Location).st_mtime
+        if self.Token.expiration <= curtime -5 and libtime < curtime - 10800:
+            self.TokenLib.__init__(self.TokenLib.Location)
+            self.Token = self.token()
         
     def auth_headers(self):
+        self.auth_refresh()
         if self.Token:
             return {"X-Authentication-Token":self.Token.encode()}
 
