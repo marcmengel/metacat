@@ -43,7 +43,7 @@ class RunsDBinConDB(MetaCatFilter):
 
     def hide(self, conn, *fields):
         for f in fields:
-             conn = re.sub(f"\s+{f}\s*=\s*\S+", f" {f}=(hidden)", conn, re.I)
+             conn = re.sub(rf"\s+{f}\s*=\s*\S+", f" {f}=(hidden)", conn, re.I)
         return conn
         
     def file_run_number(self, metadata):
