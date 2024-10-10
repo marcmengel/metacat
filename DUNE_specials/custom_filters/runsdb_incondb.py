@@ -1,6 +1,6 @@
 import re
 from wsdbtools import ConnectionPool
-from condb import ConDB
+from condb2 import ConDB
 from metacat.filters import MetaCatFilter
 from metacat.util.generators import chunked
 
