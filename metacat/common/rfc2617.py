@@ -22,7 +22,7 @@ def digest_server(realm, env, get_hashed_password):
 
     auth_header = env.get("HTTP_AUTHORIZATION","")
     #print ("auth_header:", auth_header)
-    matches = re.compile('Digest \s+ (.*)', re.I + re.X).match(auth_header)
+    matches = re.compile(r'Digest \s+ (.*)', re.I + re.X).match(auth_header)
     
     
     if not matches:
@@ -33,11 +33,11 @@ def digest_server(realm, env, get_hashed_password):
         return False, header        
     
     
-    vals = re.compile(', \s*', re.I + re.X).split(matches.group(1))
+    vals = re.compile(r', \s*', re.I + re.X).split(matches.group(1))
 
     dict = {}
 
-    pat = re.compile('(\S+?) \s* = \s* ("?) (.*) \\2', re.X)
+    pat = re.compile(r'(\S+?) \s* = \s* ("?) (.*) \\2', re.X)
     for val in vals:
         ms = pat.match(val)
         if ms:
