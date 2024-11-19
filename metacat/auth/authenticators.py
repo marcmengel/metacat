@@ -155,8 +155,8 @@ class DN(object):
 
     __repr__ = __str__
 
-    RFCRE=re.compile("(\s*,\s*)?([A-Z]+)=")
-    LegacyRE=re.compile("\s*/([A-Z]+)=")
+    RFCRE=re.compile(r"(\s*,\s*)?([A-Z]+)=")
+    LegacyRE=re.compile(r"\s*/([A-Z]+)=")
     
     def items(self):
         yield from sorted(self.Fields.items())
