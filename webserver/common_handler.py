@@ -96,7 +96,7 @@ def sanitized(method):
             out = _error_response(400, str(e))
         except Exception as e:
             self.log("Uncaught exception:" + str(e))
-            self.log(traceback.format_exc(e))
+            self.log(traceback.format_exc())
             raise
         return out
     return decorated
