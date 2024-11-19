@@ -1079,7 +1079,7 @@ class DataHandler(MetaCatHandler):
     def validate_checksums(self, data, errors):
         """validate checksums are in hex and of appropriate length """
 
-        for ct in data["checksums"]:
+        for ct in data.get("checksums",[]):
             cs = data["checksums"][ct]
             ct = ct.lower()
             if ct in self.expected_len and len(cs) != self.expected_len[ct]:

@@ -2,6 +2,7 @@ from metacat.auth.server import BaseHandler
 from metacat.db import DBUser, DBNamespace, DBRole
 import re, json
 from metacat.logs import Logged, Logger, init
+import traceback
 
 _StatusReasons = {
     # Status Codes
@@ -89,10 +90,14 @@ def _error_response(code, message, reason=None, type="json"):
 
     
 def sanitized(method):
-    def decorated(*params, **agrs):
-        try:    out = method(*params, **agrs)
+    def decorated(self, *params, **agrs):
+        try:    out = method(self, *params, **agrs)
         except SanitizeException as e:
             out = _error_response(400, str(e))
+        except Exception as e:
+            self.log("Uncaught exception:" + str(e))
+            self.log(traceback.format_exc(e))
+            raise
         return out
     return decorated
 
