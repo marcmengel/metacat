@@ -510,7 +510,7 @@ class DBFile(DBObject):
             """,
             (self.FID, self.Namespace, self.Name, meta, self.Size, checksums, creator,
 
-                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if self.CreatedTimestamp else null))
+                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if self.CreatedTimestamp else datetime.now()))
         self.CreatedTimestamp = c.fetchone()[0]
         if self.Parents:
             insert_many(self.DB,
@@ -543,7 +543,7 @@ class DBFile(DBObject):
                 f.Size if f.Size is not None else null,
                 json.dumps(f.Checksums) if f.Checksums else '{}',
                 f.Creator or creator or null,
-                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if f.CreatedTimestamp else null,
+                datetime.fromtimestamp(f.CreatedTimestamp).isoformat() if f.CreatedTimestamp else datetime.now(),
             ))
             f.Creator = f.Creator or creator
             if f.Parents:
