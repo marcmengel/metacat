@@ -69,7 +69,8 @@ def test_metacat_file_declare_many_33(auth, tst_ds_33, tst_file_md_list_33):
     assert data.find(tst_file_md_list_33[0]["name"]) > 0
     assert data.find(tst_file_md_list_33[1]["name"]) > 0
     # also check issue #60
-    assert data.find('"created_timestamp": 1') > 0
+    assert data.find('"created_timestamp"') > 0
+    assert data.find('"created_timestamp": null') < 0
 
 
 def test_update_33(auth, tst_ds_33, tst_file_md_list_33):
