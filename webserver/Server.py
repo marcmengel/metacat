@@ -3,7 +3,7 @@ import yaml, os, getopt, sys
 from webpie import WPApp, WPHandler, Response, WPStaticHandler
 from pythreader import schedule_task, Primitive, synchronized
 from metacat.db import DBUser, DBRole, DBDataset
-from metacat.filters import load_filters_module, standard_filters
+from metacat.filters import standard_filters
 
 from datetime import datetime, timezone
 #import webpie
@@ -104,7 +104,7 @@ class App(BaseApp, Primitive):
             name = mod_spec["name"]
             env = mod_spec.get("env")
             filter_cfg = mod_spec.get("config")
-            filters_from_module = load_filters_module(name, env, filter_cfg)
+            filters_from_module = self.load_filters_module(name, env, filter_cfg)
             self.CustomFilters.update(filters_from_module)
 
         self.Filters = {}
@@ -112,6 +112,31 @@ class App(BaseApp, Primitive):
         self.Filters.update(self.CustomFilters)
         self.init_auth_core(cfg)
         self.Realm = self.AuthCore.Realm
+
+    def load_filters_module(self, module_name, env, config):
+        from importlib import import_module
+        saved_environ = None
+        if env:
+            saved_environ = os.environ.copy()
+            os.environ.update(env)
+        filters = {}
+        try:
+            mod = import_module(module_name)
+            filters = mod.create_filters(config)
+        except ImportError as e:
+            self.Logger.error("Failed to import filters module %s with error: %s" % (module_name, e), who="metacat")
+        except AttributeError as e:
+            self.Logger.error("Failed to create filter %s (missing create_filters method) with error: %s" % (module_name, e), who="metacat")
+        except Exception as e:
+            self.Logger.error("Failed filter %s with error: %s" % (module_name, e), who="metacat")
+        finally:
+            if saved_environ:
+                for k in env.keys():
+                    if k in saved_environ:
+                        os.environ[k] = saved_environ[k]
+                    else:
+                        del os.environ[k]
+        return filters
 
     def update_file_counts(self):
         db = self.connect()

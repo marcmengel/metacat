@@ -198,22 +198,3 @@ standard_filters = {
     "randomize":    Randomize()
 }
 
-def load_filters_module(module_name, env, config):
-    import os
-    from importlib import import_module
-    saved_environ = None
-    if env:
-        saved_environ = os.environ.copy()
-        os.environ.update(env)
-    try:
-        mod = import_module(module_name)
-        filters = mod.create_filters(config)
-    finally:
-        if saved_environ:
-            for k in env.keys():
-                if k in saved_environ:
-                    os.environ[k] = saved_environ[k]
-                else:
-                    del os.environ[k]
-    return filters
-
