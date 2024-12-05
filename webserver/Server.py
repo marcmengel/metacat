@@ -89,7 +89,7 @@ class App(BaseApp, Primitive):
         self.StaticLocation = static_location
 
         config_name = os.environ.get("METACAT_SERVER_CFG")
-        instance_name = config_name.split("/")[1].split(".")[0]
+        instance_name = config_name.split("/")[-1].split(".")[0]
         log_file = "logs/%s.log" % instance_name
         self.Logger = Logger(log_file)
 
