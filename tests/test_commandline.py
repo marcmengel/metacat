@@ -362,9 +362,23 @@ def test_metacat_file_show(auth, tst_file_md_list, tst_ds):
     ns = tst_file_md_list[3]["namespace"]
     with os.popen(f"metacat file show -j -m {ns}:{fname}", "r") as fin:
         data = fin.read()
-    assert data.find(fname) >= 0
-    assert data.find(ns) >= 0
-    assert json.loads(data)
+    # we should be able to load the json data
+    md = json.loads(data)
+    print("metadata:", data)
+    assert md
+    # and it should all be there...
+    assert 'fid' in md
+    assert md['name'] == fname
+    assert md['namespace'] == ns
+    assert md['size'] == 39
+    assert md['created_timestamp'] > 0
+    assert md['creator'] == os.environ["USER"]
+    assert 'updated_timestamp' in md
+    assert 'updated_by' in md
+    assert md['retired_by'] == None
+    assert md['retired_timestamp'] == None
+    assert 'adler32' in md['checksums']
+    assert 'f.ds' in md['metadata']
 
 def test_metacat_file_show2(auth, tst_file_md_list, tst_ds):
     # make sure file name and fid are consistent
