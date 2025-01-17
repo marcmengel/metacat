@@ -1304,6 +1304,8 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
                 url += f"&namespace={namespace}"
             if include_retired_files:
                 url += "&include_retired_files=yes"
+            results = self.post_json(url, query)
+            return results
         else:
             url = "data/query?with_meta=%s&with_provenance=%s" % ("yes" if with_metadata else "no","yes" if with_provenance else "no")
             if namespace:
@@ -1314,9 +1316,8 @@ class MetaCatClient(HTTPClient, TokenAuthClientMixin):
                 url += f"&add_to={add_to}"
             if include_retired_files:
                 url += "&include_retired_files=yes"
-        #print("url:", url)
-        results = self.post_json(url, query)
-        return results
+            results = self.post_json(url, query)
+            return results
 
     def async_query(self, query, data=None, **args):
         """Run the query asynchronously. Requires client authentication if save_as or add_to are used.
